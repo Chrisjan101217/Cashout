@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload & Send Document</title>
+  <link rel="stylesheet" href="/css/sendfile/sndfl.css">
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">
+      <img src="/img/HRIco.jpg" alt="HR Logo" />
+      <span>Human Resource Management & Development Office</span>
+    </div>
+    <div class="header-title">Upload Document Module</div>
+  </header>
+
+  <h1>Upload Document & Send to Staff</h1>
+
+  <a href="/web/dashboard.html" class="back-button">← Back to Dashboard</a>
+
+ <form id="uploadForm">
+  <label for="docTitle">Document Title:</label>
+  <input type="text" id="docTitle" name="docTitle" required />
+
+  <label for="docLink">Document Link:</label>
+  <input type="url" id="docLink" name="docLink" placeholder="Paste document link here" required />
+
+  <label for="sendTo">Send To Staff:</label>
+  <select id="sendTo" name="sendTo" required>
+    <option value="">-- Select Staff --</option>
+    <option value="Dong@hr.com">Hr Dong</option>
+    <option value="Mabelle@hr.com">Hr Mabelle</option>
+    <option value="Head@hr.com">HR Head</option>
+  </select>
+
+  <button type="submit">Send Document</button>
+</form>
+
+  <div id="statusMessage"></div>
+
+
+
+  <script src="/src/sendfile/sndfl.js"></script>
+</body>
+
+</html>

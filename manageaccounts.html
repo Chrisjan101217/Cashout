@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Accounts - HR RecordLink</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        /* Navbar Styles */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(to right, orange, green);
+            color: #fff;
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-container img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .logo-container span {
+            margin-left: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .dashboard-profile {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            text-align: right;
+            line-height: 1.2;
+        }
+
+        .profile-name:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-name small {
+            opacity: 0.9;
+            display: block;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            list-style: none;
+            padding: 0;
+            margin: 5px 0 0 0;
+            min-width: 150px;
+            z-index: 1000;
+        }
+
+        .profile-dropdown li {
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-dropdown li a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .profile-dropdown li a:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Back button style */
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Rest of your existing styles */
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        /* Add new styles for two-column layout */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .form-grid .form-group {
+            margin-bottom: 5px;
+            padding: 5px;
+        }
+
+        .form-grid .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .status-inactive {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-button:hover {
+            text-decoration: underline;
+        }
+
+        #statusMessage {
+            display: none;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        .status-deleted {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .password-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 0.5rem;
+            padding-right: 40px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password:hover {
+            color: #333;
+        }
+
+        .toggle-password:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <button class="back-button" onclick="window.location.href='/web/dashboard.html'">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </button>
+        <div class="logo-container">
+            <img src="/img/HRIco.jpg" alt="HR Logo">
+            <span>User Management</span>
+        </div>
+        <div class="dashboard-profile">
+            <img src="/img/UserIco.png" alt="Profile" class="profile-icon" />
+            <div class="profile-name" onclick="toggleProfileMenu()" id="profileName">Loading...</div>
+            <ul class="profile-dropdown" id="profileMenu">
+                <li class="admin-only" style="display: none;"><a href="/web/manageaccounts.html">Manage Accounts</a></li>
+                <li><a href="#" onclick="logout()">Log Out</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="statusMessage"></div>
+        
+        <div class="card">
+            <div class="header-actions" style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                <button class="btn btn-primary" onclick="showAddUserModal()">Add New User</button>
+            </div>
+            <table id="usersTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="hideModal('userModal')">&times;</span>
+            <h2 id="modalTitle">Add New User</h2>
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <div class="form-grid">
+                    <div class="form-group" style="margin-right: 15px;">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-input-container">
+                            <input type="password" id="password" class="password-input">
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small>(Leave blank to keep existing password when editing)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="password-input-container">
+                            <input type="password" id="confirmPassword" class="password-input">
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirmPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select id="role" required>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Archive Confirmation Modal -->
+    <div id="archiveModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="$('#archiveModal').hide()">&times;</span>
+            <h2>Archive Document</h2>
+            <p>Are you sure you want to archive this document?</p>
+            <input type="hidden" id="archiveDocId">
+            <div class="modal-buttons">
+                <button onclick="confirmArchive()" class="action-button archive">Yes, Archive</button>
+                <button onclick="$('#archiveModal').hide()" class="action-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Initialize Firebase
+        async function initializeFirebase() {
+            try {
+                const response = await fetch('/private/client.json');
+                const config = await response.json();
+                
+                const firebaseConfig = {
+                    apiKey: config.FIREBASE_API_KEY,
+                    authDomain: config.FIREBASE_AUTH_DOMAIN,
+                    projectId: config.FIREBASE_PROJECT_ID,
+                    storageBucket: config.FIREBASE_STORAGE_BUCKET,
+                    messagingSenderId: config.FIREBASE_MESSAGING_SENDER_ID,
+                    appId: config.FIREBASE_APP_ID
+                };
+
+                // Initialize Firebase
+                firebase.initializeApp(firebaseConfig);
+                
+                // Initialize Firebase services
+                const auth = firebase.auth();
+                const db = firebase.firestore();
+                
+                return true;
+            } catch (error) {
+                console.error('Error initializing Firebase:', error);
+                return false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize Firebase first
+            const initialized = await initializeFirebase();
+            if (!initialized) {
+                showStatus('Error initializing application. Please try again later.', true);
+                return;
+            }
+
+            // Check for user session and update profile name
+            const userSession = sessionStorage.getItem('userSession');
+            if (!userSession) {
+                window.location.href = '/web/userlogin.html';
+                return;
+            }
+            
+            const userData = JSON.parse(userSession);
+            // Update profile name with username and role
+            const profileNameElement = document.getElementById('profileName');
+            profileNameElement.innerHTML = `${userData.username}<br><small style="font-size: 0.8em;">${userData.role.toUpperCase()}</small>`;
+
+            // Initialize Firestore
+            const db = firebase.firestore();
+
+            // Check for user session
+            const checkSession = () => {
+                const userSession = sessionStorage.getItem('userSession');
+                if (!userSession) {
+                    window.location.href = '/web/userlogin.html';
+                    return;
+                }
+                
+                const userData = JSON.parse(userSession);
+                if (userData.role.toLowerCase() !== 'admin') {
+                    window.location.href = '/web/dashboard.html';
+                    return;
+                }
+            };
+
+            // Initialize session check
+            checkSession();
+
+            // Initialize DataTable
+            let usersTable;
+
+            // Load users data
+            async function loadUsers() {
+                try {
+                    const usersRef = db.collection('accounts');
+                    
+                    // First test if we can access the collection
+                    try {
+                        const testSnapshot = await usersRef.limit(1).get();
+                        console.log('Successfully connected to Firestore');
+                    } catch (error) {
+                        console.error('Error accessing Firestore:', error);
+                        showStatus('Error accessing database. Please check your connection and reload the page.', true);
+                        return;
+                    }
+                    
+                    // Set up real-time listener with error handling
+                    const unsubscribe = usersRef.onSnapshot((snapshot) => {
+                        const users = [];
+                        snapshot.forEach((doc) => {
+                            const userData = doc.data();
+                            // Skip if no username or email (invalid user)
+                            if (!userData.username || !userData.email) return;
+                            
+                            users.push({
+                                id: doc.id,
+                                username: userData.username,
+                                email: userData.email,
+                                role: userData.role || 'user',
+                                status: userData.status || 'active'
+                            });
+                        });
+                        
+                        if (usersTable) {
+                            usersTable.clear().rows.add(users).draw();
+                        } else {
+                            initializeDataTable(users);
+                        }
+                    }, (error) => {
+                        console.error('Firestore listener error:', error);
+                        showStatus('Error listening to database changes: ' + error.message, true);
+                    });
+
+                    // Store unsubscribe function for cleanup
+                    window.addEventListener('beforeunload', () => {
+                        unsubscribe();
+                    });
+                } catch (error) {
+                    console.error('Error in loadUsers:', error);
+                    showStatus('Error loading users: ' + error.message, true);
+                }
+            }
+
+            // Initialize DataTable
+            function initializeDataTable(users) {
+                usersTable = $('#usersTable').DataTable({
+                    data: users,
+                    columns: [
+                        { data: 'username' },
+                        { data: 'email' },
+                        { 
+                            data: 'role',
+                            render: function(data) {
+                                return data.charAt(0).toUpperCase() + data.slice(1);
+                            }
+                        },
+                        {
+                            data: 'status',
+                            render: function(data) {
+                                const statusClass = data === 'active' ? 'status-active' : 
+                                                  data === 'deleted' ? 'status-deleted' :
+                                                  'status-inactive';
+                                return `<span class="status-badge ${statusClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                            }
+                        },
+                        {
+                            data: 'id',
+                            title: 'Action',
+                            orderable: false,
+                            searchable: false,
+                            exportable: false,
+                            className: 'action-column',
+                            render: function(data, type, row) {
+                                if (type === 'print') {
+                                    return '';
+                                }
+                                if (type === 'display') {
+                                    const isAdmin = JSON.parse(sessionStorage.getItem('userSession')).role.toLowerCase() === 'admin';
+                                    
+                                    if (row.status === 'inactive') {
+                                        return `
+                                            <div class="action-buttons">
+                                                <button onclick="editUser('${data}')" class="action-button edit">Edit</button>
+                                            </div>
+                                        `;
+                                    } else {
+                                        return `
+                                            <div class="action-buttons">
+                                                <button onclick="editUser('${data}')" class="action-button edit">Edit</button>
+                                                ${isAdmin ? `<button onclick="archiveDocument('${data}')" class="action-button archive">Archive</button>` : ''}
+                                            </div>
+                                        `;
+                                    }
+                                }
+                                return data;
+                            }
+                        }
+                    ],
+                    order: [[0, 'asc']]
+                });
+            }
+
+            // Show status message
+            function showStatus(message, isError = false) {
+                const statusDiv = document.getElementById('statusMessage');
+                statusDiv.textContent = message;
+                statusDiv.className = isError ? 'error' : 'success';
+                statusDiv.style.display = 'block';
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            }
+
+            // Show/hide modals
+            window.showModal = function(modalId) {
+                document.getElementById(modalId).style.display = 'block';
+            }
+
+            window.hideModal = function(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+                if (modalId === 'userModal') {
+                    document.getElementById('userForm').reset();
+                    document.getElementById('userId').value = '';
+                }
+            }
+
+            // Add new user
+            window.showAddUserModal = function() {
+                document.getElementById('modalTitle').textContent = 'Add New User';
+                document.getElementById('userForm').reset();
+                document.getElementById('userId').value = '';
+                document.getElementById('password').required = true;
+                document.getElementById('confirmPassword').required = true;
+                document.getElementById('password').value = '';
+                document.getElementById('confirmPassword').value = '';
+                showModal('userModal');
+            }
+
+            // Edit user
+            window.editUser = async function(userId) {
+                try {
+                    const userRef = db.collection('accounts').doc(userId);
+                    const userDoc = await userRef.get();
+                    
+                    if (!userDoc.exists) {
+                        showStatus('User not found', true);
+                        return;
+                    }
+
+                    const userData = userDoc.data();
+                    document.getElementById('modalTitle').textContent = 'Edit User';
+                    document.getElementById('userId').value = userId;
+                    document.getElementById('username').value = userData.username || '';
+                    document.getElementById('email').value = userData.email || '';
+                    document.getElementById('role').value = userData.role || 'user';
+                    document.getElementById('status').value = userData.status || 'active';
+                    document.getElementById('password').required = false;
+                    document.getElementById('password').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                    showModal('userModal');
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    showStatus('Error loading user details: ' + error.message, true);
+                }
+            }
+
+            // Archive user
+            window.archiveDocument = function(id) {
+                $('#archiveDocId').val(id);
+                $('#archiveModal').show();
+            };
+
+            window.confirmArchive = async function() {
+                const id = $('#archiveDocId').val();
+                showLoading();
+                
+                try {
+                    const docRef = db.collection('accounts').doc(id);
+                    const docSnap = await docRef.get();
+                    
+                    if (docSnap.exists()) {
+                        const currentData = docSnap.data();
+                        await docRef.update({
+                            status: 'inactive',
+                            archivedAt: new Date().toISOString()
+                        });
+                    }
+                    
+                    $('#archiveModal').hide();
+                    showStatus('User has been deactivated successfully!');
+                } catch (error) {
+                    console.error('Error deactivating user:', error);
+                    showStatus('Error deactivating user. Please try again.', true);
+                } finally {
+                    hideLoading();
+                }
+            };
+
+            // Handle form submission
+            document.getElementById('userForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const userId = document.getElementById('userId').value;
+                const username = document.getElementById('username').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const role = document.getElementById('role').value;
+                const status = document.getElementById('status').value;
+
+                // Validate inputs
+                if (!username || !email) {
+                    showStatus('Username and email are required', true);
+                    return;
+                }
+
+                if (!userId) {  // Only check password for new users
+                    if (!password || !confirmPassword) {
+                        showStatus('Password and confirm password are required', true);
+                        return;
+                    }
+
+                    if (password !== confirmPassword) {
+                        showStatus('Passwords do not match', true);
+                        return;
+                    }
+                }
+
+                // Check if username already exists (for new users)
+                if (!userId) {
+                    try {
+                        const snapshot = await db.collection('accounts').get();
+                        const exists = snapshot.docs.some(doc => 
+                            doc.data().username.toLowerCase() === username.toLowerCase() ||
+                            doc.data().email.toLowerCase() === email.toLowerCase()
+                        );
+                        
+                        if (exists) {
+                            showStatus('Username or email already exists', true);
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('Error checking existing users:', error);
+                        showStatus('Error checking existing users: ' + error.message, true);
+                        return;
+                    }
+                }
+
+                // Function to hash password
+                async function hashPassword(password) {
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(password);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+                }
+
+                const userData = {
+                    username,
+                    email,
+                    role,
+                    status,
+                    updatedAt: new Date().toISOString()
+                };
+
+                try {
+                    if (userId) {
+                        // Update existing user
+                        if (password) {  // Only update password if provided
+                            userData.password = await hashPassword(password);
+                        }
+                        await db.collection('accounts').doc(userId).update(userData);
+                        showStatus('User updated successfully');
+                    } else {
+                        // Create user in Firebase Authentication first
+                        try {
+                            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                            const firebaseUser = userCredential.user;
+                            
+                            // Add new user to Firestore using the Firebase Auth UID
+                            userData.createdAt = new Date().toISOString();
+                            userData.password = await hashPassword(password);  // Store hashed password
+                            await db.collection('accounts').doc(firebaseUser.uid).set(userData);
+                            showStatus('User added successfully');
+                        } catch (authError) {
+                            console.error('Error creating user in Firebase Auth:', authError);
+                            showStatus('Error creating user: ' + authError.message, true);
+                            return;
+                        }
+                    }
+                    hideModal('userModal');
+                } catch (error) {
+                    console.error('Error saving user:', error);
+                    showStatus('Error saving user: ' + error.message, true);
+                }
+            });
+
+            // Initialize the page
+            loadUsers();
+
+            // Password visibility toggle function
+            window.togglePasswordVisibility = function(inputId) {
+                const input = document.getElementById(inputId);
+                const button = input.parentElement.querySelector('.toggle-password');
+                const icon = button.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            };
+
+            // Reset password fields and icons when modal is closed
+            const originalHideModal = window.hideModal;
+            window.hideModal = function(modalId) {
+                originalHideModal(modalId);
+                if (modalId === 'userModal') {
+                    const passwordInputs = document.querySelectorAll('input[type="text"].password-input');
+                    passwordInputs.forEach(input => {
+                        input.type = 'password';
+                        const icon = input.parentElement.querySelector('.toggle-password i');
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    });
+                }
+            };
+        });
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById("profileMenu");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            const profile = document.querySelector('.dashboard-profile');
+            const menu = document.getElementById('profileMenu');
+            if (!profile.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 

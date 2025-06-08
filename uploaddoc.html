@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Document</title>
+  <link rel="stylesheet" href="/css/uploaddoc/upd.css">
+  <link rel="stylesheet" href="uploaddocu.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+  <div class="upload-container">
+    <h2>Upload New Document</h2>
+    <form action="#" method="post" enctype="multipart/form-data">
+      <label for="controlNum">Control #:</label>
+      <input type="text" id="controlNum" name="controlNum" required>
+
+      <label for="date">Date:</label>
+      <input type="date" id="date" name="date" required>
+
+      <label for="subject">Subject:</label>
+      <input type="text" id="subject" name="subject" required>
+
+      <label for="from">From:</label>
+      <input type="text" id="from" name="from" required>
+
+      <label for="from">Received by:</label>
+      <input type="text" id="from" name="from" required>
+
+      <label for="content">Content:</label>
+      <textarea id="content" name="content" rows="4" required></textarea>
+
+      <label for="docLink">Document Link:</label>
+      <input type="url" id="docLink" name="docLink" placeholder="Paste document link here" required>
+
+
+      <button type="submit">Submit Document</button>
+
+
+      <a href="/web/dashboard.html" class="back-btn">Back to Dashboard</a>
+    </form>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Module</title>
+  <link rel="stylesheet" href="/css/viewprofile/vprf.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+  <div class="profile-card">
+    <div class="profile-info">
+      <div class="profile-image">
+        <img src="/img/UserIco.png" alt="Profile Photo" />
+      </div>
+      <h2>Juan Dela Cruz</h2>
+      <p class="title">HR STAFF</p>
+
+      <div class="input-group">
+        <label>ID Number:</label>
+        <p id="id-number">CHID-044</p>
+      </div>
+
+      <div class="input-group">
+        <label>Username:</label>
+        <input type="text" id="username" value="JUANDELA" />
+      </div>
+
+      <div class="input-group">
+        <label>Password:</label>
+        <input type="password" id="password" value="CRUZ" />
+      </div>
+
+      <button class="save-btn" onclick="saveProfile()">Save</button>
+      <button class="back-btn" onclick="window.location.href='/web/dashboard.html'">Back</button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/client/cli.mjs"></script>
+  <script src="/src/viewprofle/vwprl.js"></script>
+</body>
+</html>

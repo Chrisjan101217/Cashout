@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Document</title>
+  <link rel="stylesheet" href="/css/viewmodule/vmdl.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+  <div class="view-container">
+    <h2>View Document</h2>
+    <p><span class="label">Control #:</span> 2025-01-0001</p>
+    <p><span class="label">Date:</span> 2025-05-03</p>
+    <p><span class="label">Time:</span> 10:30 AM</p>
+    <p><span class="label">Subject:</span> Request</p>
+    <p><span class="label">From:</span> John Doe</p>
+    <p><span class="label">Content:</span> Requesting Certificate</p>
+    <p><span class="label">Received By:</span> Jane Smith</p>
+    <p><span class="label">Open</span></p>
+
+    
+    <div class="document-viewer">
+  <button onclick="copyLink(document.querySelector('.document-viewer iframe').src)" 
+          style="margin-bottom: 10px;">
+    📋 Copy Document Link
+  </button>
+  <iframe src="path/to/your/document.pdf" width="150%" height="100%" frameborder="0">
+    Your browser does not support iframes.
+  </iframe>
+</div>
+
+    <a href="/web/dashboard.html" class="back-btn">Back to Dashboard</a>
+  </div>
+</body>
+
+</html>

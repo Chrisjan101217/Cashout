@@ -1,0 +1,4115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RecordLink Dashboard</title>
+  <link rel="stylesheet" href="/css/dashboard/dshbrd.css" />
+  <link rel="stylesheet" href="/css/dashboard/poppup.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <!-- Update Bootstrap dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <!-- DataTables Buttons for Export -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+  <!-- Add Select2 CSS and JS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <!-- Add jQuery Timepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
+  <!-- Add Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    /* Dashboard styling to match the provided image */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Add textarea styles for outgoing form */
+    #outgoingRemarks {
+      width: 100%;
+      max-width: 100%;
+      min-height: 100px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    #outgoingRemarks:focus {
+      outline: none;
+      border-color: #3F51B5;
+      box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.1);
+    }
+
+    .action-button.outgoing {
+      background-color: #3F51B5;
+      color: white;
+    }
+
+    .action-button.outgoing:hover {
+      background-color: #303F9F;
+    }
+
+    .action-button.for-outgoing {
+      background-color: #3F51B5;
+      color: white;
+    }
+
+    .action-button.for-outgoing:hover {
+      background-color: #303F9F;
+    }
+    
+    .dashboard-main {
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .dashboard-top {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .dashboard-top h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #333;
+      white-space: nowrap;
+    }
+    
+    .dashboard-header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .export-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .export-excel-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+    
+    .add-employee-btn {
+      background-color: #FF5722;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      width: 400px;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .send-btn {
+      padding: 10px 15px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 16px;
+      display: inline-block;
+    }
+
+    .send-btn:hover {
+      background-color: #218838;
+    }
+
+    .status-label {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-block;
+      text-align: center;
+      min-width: 100px;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-Pending {
+      background-color: #ffc107;
+      color: #000;
+    }
+
+    .status-Archived {
+      background-color: #6c757d;
+      color: #fff;
+    }
+
+    .status-label[class*="status-Assigned"] {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    .status-label[class*="status-Released"] {
+      background-color: #28a745;
+      color: #fff;
+    }
+
+    .status-label.status-Outgoing {
+      background-color: #3F51B5;
+      color: #fff;
+    }
+
+    .status-Deleted {
+      background-color: #dc3545;
+      color: #fff;
+    }
+
+    .status-Active {
+      background-color: #28a745;
+      color: #fff;
+    }
+    
+    /* DataTables Custom Styling to match the image */
+    .dataTables_wrapper .dataTables_filter {
+      float: right;
+      margin-bottom: 15px;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 250px;
+      background-color: #f5f5f5;
+    }
+    
+    .dataTables_wrapper .dataTables_length select {
+      padding: 6px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f5f5f5;
+    }
+    
+    .dataTables_wrapper .dataTables_info {
+      padding-top: 15px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    table.dataTable {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      border: 1px solid #eee;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background-color: white;
+    }
+    
+    table.dataTable thead th {
+      padding: 12px 10px;
+      background-color: #f9f9f9;
+      color: #333;
+      font-weight: bold;
+      border-bottom: 2px solid #eee;
+      text-align: left;
+    }
+    
+    table.dataTable tbody td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #eee;
+      color: #333;
+    }
+    
+    table.dataTable tbody tr:hover {
+      background-color: #f9f9f9;
+    }
+    
+    table.dataTable tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate {
+      margin-top: 15px;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      padding: 6px 12px;
+      margin-left: 2px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background-color: #4CAF50;
+      color: white !important;
+      border-color: #4CAF50;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+      background-color: #f5f5f5;
+      color: #333 !important;
+    }
+    
+    /* Status indicator styling */
+    .status-active {
+      background-color: #4CAF50;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      display: inline-block;
+    }
+    
+    /* Action button styling */
+    .action-button {
+      background-color: #FFC107;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 12px;
+      cursor: pointer;
+    }
+    
+    /* Export button styling */
+    .dt-buttons {
+      margin-bottom: 15px;
+    }
+    
+    .dt-button {
+      background-color: #4CAF50 !important;
+      color: white !important;
+      border: none !important;
+      padding: 8px 15px !important;
+      border-radius: 4px !important;
+      cursor: pointer !important;
+      margin-right: 8px !important;
+    }
+    
+    .dt-button:hover {
+      background-color: #3e8e41 !important;
+    }
+
+    /* Add Select2 custom styling */
+    .select2-container {
+      width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+      height: 38px;
+      padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 36px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 28px;
+    }
+
+    .select2-dropdown {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .select2-search__field {
+      padding: 6px !important;
+      border: 1px solid #ddd !important;
+    }
+
+    .select2-results__option {
+      padding: 8px;
+    }
+
+    .select2-results__option--highlighted[aria-selected] {
+      background-color: #4CAF50 !important;
+    }
+
+    /* Loading Spinner Styles */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #4CAF50;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      margin-top: 10px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    /* Form Styling */
+    .modal form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group label {
+      font-weight: 500;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .form-group textarea {
+      width: 100%;
+      max-width: 100%;
+      min-height: 100px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #3F51B5;
+      box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.1);
+    }
+
+    .form-group input {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #4CAF50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+    }
+
+    .modal form button[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+    }
+
+    .modal form button[type="submit"]:hover {
+      background-color: #3d8b40;
+    }
+
+    #statusMessage {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    #statusMessage.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    #statusMessage.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Add CSS for action buttons */
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+      justify-content: flex-start;
+    }
+
+    .action-button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s;
+    }
+
+    .action-button.edit {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .action-button.archive {
+      background-color: #ffc107;
+      color: black;
+    }
+
+    .action-button.delete {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .action-button:hover {
+      opacity: 0.8;
+    }
+
+    /* Add style for control number input group */
+    .control-number-group {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .control-number-prefix {
+      width: 100px;
+      background-color: #f8f9fa;
+      color: #495057;
+      cursor: not-allowed;
+    }
+
+    .control-number-input {
+      flex: 1;
+    }
+
+    /* Add updated form styles */
+    .document-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .detail-group {
+      margin-bottom: 0;
+    }
+
+    .detail-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .detail-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .detail-group input:not(.control-number-input):not(.control-number-prefix),
+    .detail-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .control-number-group {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      width: auto;
+    }
+
+    .control-number-prefix {
+      width: 100px;
+      background-color: #f8f9fa;
+      color: #495057;
+      cursor: not-allowed;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .control-number-input {
+      width: 200px;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .modal-content {
+      max-width: 70%;
+      width: 70%;
+      margin: 5% auto;
+      padding: 25px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .document-details {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        max-width: 90%;
+        width: 90%;
+        margin: 10% auto;
+      }
+    }
+
+    /* Add styles for deleted rows and restore button */
+    .deleted-row {
+      opacity: 0.7;
+    }
+
+    .action-button.restore {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .deleted-row td {
+      background-color: #f8f9fa !important;
+      font-style: italic;
+    }
+
+    /* Add card container styles */
+    .card-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    /* Update table styles to work with card */
+    .documents-table {
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Adjust DataTables styles */
+    .dataTables_wrapper {
+      padding: 0;
+    }
+
+    .dataTables_filter {
+      margin-right: 0;
+    }
+
+    .dataTables_length {
+      margin-left: 0;
+    }
+
+    /* Add hover effect to the card */
+    .card-container:hover {
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+      transition: box-shadow 0.3s ease-in-out;
+    }
+
+    /* Ensure proper spacing inside the card */
+    .dataTables_wrapper .dataTables_filter {
+      margin-bottom: 20px;
+    }
+
+    .dataTables_wrapper .dataTables_info {
+      padding: 20px 0;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+      padding-top: 20px;
+    }
+
+    /* Style the table header to match the card */
+    table.dataTable thead th {
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+      padding: 15px 10px;
+    }
+
+    /* Improve table row styling */
+    table.dataTable tbody td {
+      padding: 12px 10px;
+      vertical-align: middle;
+    }
+
+    table.dataTable tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    /* Add styles for assignment details */
+    .assignment-details {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+
+    #assignmentDetailsSection {
+      border-top: 2px solid #dee2e6;
+      margin-top: 15px;
+      padding-top: 15px;
+    }
+
+    .assignment-details label {
+      color: #495057;
+      font-weight: 600;
+    }
+
+    .assignment-details p {
+      color: #0056b3;
+      margin: 5px 0 0 0;
+    }
+
+    /* Filter Section Styles */
+    .filter-section {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+      color: #495057;
+    }
+
+    .filter-btn:hover {
+      background: #e9ecef;
+    }
+
+    .filter-btn.active {
+      background: #007bff;
+      color: white;
+    }
+
+    .filter-btn[data-status="Pending"] {
+      border: 1px solid #ffc107;
+    }
+
+    .filter-btn[data-status="Pending"].active {
+      background: #ffc107;
+      color: #000;
+    }
+
+    .filter-btn[data-status="Assigned"] {
+      border: 1px solid #007bff;
+    }
+
+    .filter-btn[data-status="Assigned"].active {
+      background: #007bff;
+      color: white;
+    }
+
+    .filter-btn[data-status="Archived"] {
+      border: 1px solid #6c757d;
+    }
+
+    .filter-btn[data-status="Archived"].active {
+      background: #6c757d;
+      color: white;
+    }
+
+    .filter-btn.clear {
+      border: 1px solid #dc3545;
+    }
+
+    .filter-btn.clear:hover {
+      background: #dc3545;
+      color: white;
+    }
+
+    .active-filter {
+      font-size: 14px;
+      color: #6c757d;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .filter-section {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .filter-buttons {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .active-filter {
+        text-align: center;
+      }
+    }
+
+    /* Update filter buttons styling */
+    .filter-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+      color: #495057;
+    }
+
+    .filter-btn:hover {
+      background: #e9ecef;
+    }
+
+    .filter-btn.active {
+      background: #007bff;
+      color: white;
+    }
+
+    .filter-btn[data-status="Pending"] {
+      border: 1px solid #ffc107;
+    }
+
+    .filter-btn[data-status="Pending"].active {
+      background: #ffc107;
+      color: #000;
+    }
+
+    .filter-btn[data-status="Assigned"] {
+      border: 1px solid #007bff;
+    }
+
+    .filter-btn[data-status="Assigned"].active {
+      background: #007bff;
+      color: white;
+    }
+
+    .filter-btn[data-status="Archived"] {
+      border: 1px solid #6c757d;
+    }
+
+    .filter-btn[data-status="Archived"].active {
+      background: #6c757d;
+      color: white;
+    }
+
+    .filter-btn.clear {
+      border: 1px solid #dc3545;
+    }
+
+    .filter-btn.clear:hover {
+      background: #dc3545;
+      color: white;
+    }
+
+    .filter-status {
+      font-size: 13px;
+      color: #6c757d;
+      white-space: nowrap;
+    }
+
+    .export-buttons {
+      white-space: nowrap;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 992px) {
+      .dashboard-top {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .filter-buttons {
+        order: 2;
+      }
+
+      .export-buttons {
+        order: 3;
+        justify-content: center;
+        display: flex;
+      }
+    }
+
+    /* Add styles for profile menu */
+    .dashboard-profile {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .profile-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .profile-name {
+      color: white;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      text-align: right;
+      line-height: 1.2;
+    }
+
+    .profile-name small {
+      opacity: 0.9;
+      display: block;
+    }
+
+    .profile-name:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: none;
+      list-style: none;
+      padding: 0;
+      margin: 5px 0 0 0;
+      min-width: 150px;
+      z-index: 1000;
+    }
+
+    .profile-dropdown li {
+      margin: 0;
+      padding: 0;
+    }
+
+    .profile-dropdown li a {
+      display: block;
+      padding: 10px 15px;
+      color: #333;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .profile-dropdown li a:hover {
+      background-color: #f8f9fa;
+    }
+
+    /* Add view button style */
+    .action-button.view {
+      background-color: #4CAF50;  /* Changed from #17a2b8 to green */
+      color: white;
+    }
+
+    .action-button.view:hover {
+      background-color: #45a049;
+    }
+
+    .action-button.assign {
+      background-color: #FF9800;  /* Orange color */
+      color: white;
+    }
+
+    .action-button.assign:hover {
+      background-color: #F57C00;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .action-button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background-color 0.2s;
+    }
+
+    .action-button.for-release {
+      background-color: #9C27B0;
+      color: white;
+    }
+
+    .action-button.for-release:hover {
+      background-color: #7B1FA2;
+    }
+
+    .action-button.release {
+      background-color: #9C27B0;
+      color: white;
+    }
+
+    .action-button.release:hover {
+      background-color: #7B1FA2;
+    }
+
+    .required {
+      color: red;
+      margin-left: 3px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .action-button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background-color 0.2s;
+    }
+
+    .release-details {
+      background-color: #e8f5e9;  /* Light green background */
+      border-radius: 4px;
+      padding: 10px;
+      margin-top: 5px;
+    }
+
+    .release-details label {
+      color: #2e7d32;  /* Darker green for labels */
+      font-weight: 600;
+    }
+
+    .release-details p {
+      color: #1b5e20;  /* Even darker green for text */
+      margin: 5px 0 0 0;
+    }
+
+    #releaseDetailsSection {
+      border-top: 2px solid #c8e6c9;  /* Light green border */
+      margin-top: 15px;
+      padding-top: 15px;
+    }
+
+    .action-button.send-to-all {
+      background-color: #3F51B5;
+      color: white;
+    }
+
+    .action-button.send-to-all:hover {
+      background-color: #303F9F;
+    }
+
+    .action-button.send-to-all:disabled {
+      background-color: #9FA8DA;
+      cursor: not-allowed;
+    }
+
+    .confirmation-checkbox {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+    }
+
+    .confirmation-checkbox input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    .confirmation-checkbox label {
+      color: #495057;
+      font-weight: 500;
+    }
+
+    .status-label.for-all {
+      background-color: #3F51B5;
+      color: white;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .status-label.for-all:before {
+      content: "👥";
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .sent-to-all-details {
+      background-color: #E8EAF6;
+      border-radius: 4px;
+      padding: 10px;
+      margin-top: 5px;
+    }
+
+    .sent-to-all-details label {
+      color: #3F51B5;
+      font-weight: 600;
+    }
+
+    .sent-to-all-details p {
+      color: #283593;
+      margin: 5px 0 0 0;
+    }
+
+    #sentToAllDetailsSection {
+      border-top: 2px solid #C5CAE9;
+      margin-top: 15px;
+      padding-top: 15px;
+    }
+
+    /* Add style for Shared to All status */
+    .status-label.status-Shared-to-All {
+      background-color: #E3F2FD;
+      color: #1565C0;
+      padding: 4px 12px;  /* Reset to standard padding */
+      border: 1px solid #90CAF9;
+    }
+
+    /* Remove the :before pseudo-element that contained the icon */
+    .status-display {
+      padding: 5px 0;
+    }
+
+    .status-display .status-label {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    #releaseRemarks {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+    }
+
+    #releaseRemarks:focus {
+      outline: none;
+      border-color: #4CAF50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+    }
+
+    .release-details p {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .detail-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .release-details {
+      background-color: #e8f5e9;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 10px;
+    }
+
+    .release-details label {
+      display: block;
+      color: #2e7d32;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .release-details p {
+      margin: 0;
+      padding: 8px;
+      background-color: white;
+      border-radius: 4px;
+      min-height: 24px;
+    }
+
+    #releaseDetailsSection {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #c8e6c9;
+    }
+
+    .release-remarks {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #c8e6c9;
+    }
+
+    /* Update these styles in the existing <style> tag */
+    .btn-group.action-group {
+      display: inline-flex;
+      vertical-align: middle;
+      position: relative;
+    }
+
+    .action-button.view {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px 0 0 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .action-button.dropdown-toggle-split {
+      background-color: #FFC107;
+      color: white;
+      border: none;
+      border-radius: 0 4px 4px 0;
+      padding: 6px 8px;
+      cursor: pointer;
+      margin-left: 1px;
+    }
+
+    /* Fix dropdown menu display */
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: auto;
+      right: 0;
+      transform: none !important;
+      min-width: 160px;
+      padding: 8px 0;
+      margin: 2px 0 0;
+      font-size: 13px;
+      background-color: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      z-index: 9999;
+      display: none;
+      float: left;
+      max-height: none;
+      overflow: visible;
+    }
+
+    /* Ensure table container doesn't clip dropdowns */
+    .dataTables_wrapper {
+      overflow: visible !important;
+    }
+
+    /* Ensure table cells with dropdowns don't clip */
+    .documents-table td {
+      overflow: visible !important;
+      position: relative;
+    }
+
+    /* Show dropdown when parent has show class */
+    .btn-group.show .dropdown-menu {
+      display: block;
+    }
+
+    /* Add this to ensure dropdowns are above DataTables elements */
+    div.dataTables_wrapper {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-container {
+      overflow: visible !important;
+    }
+
+    /* Style dropdown items */
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      padding: 8px 16px;
+      clear: both;
+      font-weight: normal;
+      color: #212529;
+      text-align: left;
+      text-decoration: none;
+      white-space: nowrap;
+      background-color: transparent;
+      border: 0;
+      position: relative;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f8f9fa;
+      text-decoration: none;
+    }
+
+    /* Ensure the table container doesn't clip dropdowns */
+    #mainDocumentsTable_wrapper, 
+    #releasedDocumentsTable_wrapper {
+      overflow: visible !important;
+    }
+
+    /* Update table styles to prevent clipping */
+    .documents-table {
+      position: relative;
+      margin-bottom: 20px !important;
+    }
+
+    .documents-table tbody tr {
+      position: relative;
+    }
+
+    .documents-table tbody td:last-child {
+      position: relative;
+      overflow: visible !important;
+    }
+
+    /* Add these back and update dropdown styles */
+    .dropdown-divider {
+      height: 0;
+      margin: 8px 0;
+      overflow: hidden;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .dropdown-item.archive {
+      color: #FF9800;  /* Changed from #ffc107 (yellow) to #FF9800 (orange) */
+    }
+
+    .dropdown-item.delete {
+      color: #dc3545;
+    }
+
+    .dropdown-item.archive:hover {
+      color: #F57C00;  /* Darker orange on hover */
+      background-color: #FFF3E0;  /* Light orange background on hover */
+    }
+
+    .dropdown-item.delete:hover {
+      color: #bd2130;
+      background-color: #f8d7da;
+    }
+
+    /* Add styles for the caret icon */
+    .action-button.dropdown-toggle-split::after {
+      display: inline-block;
+      margin-left: 0;
+      vertical-align: middle;
+      content: "";
+      border-top: 4px solid;
+      border-right: 4px solid transparent;
+      border-bottom: 0;
+      border-left: 4px solid transparent;
+    }
+
+    /* Additional fixes for dropdown positioning */
+    .action-group .dropdown-menu {
+      min-width: 180px;
+      margin-top: 0;
+      transform-origin: top right;
+      right: 0;
+      left: auto;
+      will-change: transform;
+    }
+
+    /* Ensure dropdown is above all other elements */
+    .action-group.show {
+      z-index: 9999;
+    }
+
+    /* Fix table cell padding to prevent dropdown cutoff */
+    .documents-table td:last-child {
+      padding-right: 20px !important;
+    }
+
+    /* Ensure proper dropdown positioning */
+    .action-group {
+      position: static;
+    }
+
+    .action-group .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: auto;
+      margin-top: 2px;
+    }
+
+    /* Update the styles */
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .action-button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background-color 0.2s;
+    }
+
+    .action-button.view {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .action-button.assign {
+      background-color: #FF9800;
+      color: white;
+    }
+
+    .action-button.for-release {
+      background-color: #9C27B0;
+      color: white;
+    }
+
+    .action-button.send-to-all {
+      background-color: #3F51B5;
+      color: white;
+    }
+
+    .action-button.dropdown-toggle-split {
+      background-color: #6c757d;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 4px;
+    }
+
+    .action-button.dropdown-toggle-split:hover {
+      background-color: #5a6268;
+    }
+
+    .btn-group.action-group {
+      display: inline-flex;
+      vertical-align: middle;
+    }
+
+    .dropdown-menu {
+      min-width: 160px;
+      padding: 8px 0;
+      margin: 2px 0 0;
+      font-size: 13px;
+      background-color: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      z-index: 9999;
+    }
+
+    .dropdown-item {
+      padding: 8px 16px;
+      color: #212529;
+    }
+
+    .dropdown-item.archive {
+      color: #ffc107;
+    }
+
+    .dropdown-item.delete {
+      color: #dc3545;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .dropdown-item.archive:hover {
+      color: #d39e00;
+      background-color: #fff3cd;
+    }
+
+    .dropdown-item.delete:hover {
+      color: #bd2130;
+      background-color: #f8d7da;
+    }
+
+    /* Outgoing button and form styles */
+    .action-button.outgoing {
+      background-color: #3F51B5;
+      color: white;
+    }
+
+    .action-button.outgoing:hover {
+      background-color: #303F9F;
+    }
+
+    .action-button.for-outgoing {
+      background-color: #3F51B5;
+      color: white;
+    }
+
+    .action-button.for-outgoing:hover {
+      background-color: #303F9F;
+    }
+
+    #outgoingRemarks {
+      width: 100%;
+      max-width: 100%;
+      min-height: 100px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    #outgoingRemarks:focus {
+      outline: none;
+      border-color: #3F51B5;
+      box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.1);
+    }
+
+    .outgoing-details {
+      background-color: #E8EAF6;  /* Light indigo background */
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 10px;
+    }
+
+    .outgoing-details label {
+      display: block;
+      color: #3F51B5;  /* Indigo color */
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .outgoing-details p {
+      margin: 0;
+      padding: 8px;
+      background-color: white;
+      border-radius: 4px;
+      min-height: 24px;
+    }
+
+    .outgoing-remarks {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #C5CAE9;  /* Light indigo border */
+    }
+
+    /* Details section styles */
+    .details-section {
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 8px;
+    }
+
+    .details-section h3 {
+      color: #333;
+      font-size: 18px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #4CAF50;
+    }
+
+    .details-section h4 {
+      color: #555;
+      font-size: 16px;
+      margin: 15px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+      margin: 20px 0;
+    }
+
+    .detail-group {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .detail-group:hover {
+      background-color: #f0f0f0;
+    }
+
+    .detail-group label {
+      display: block;
+      color: #666;
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .detail-group p {
+      margin: 0;
+      color: #333;
+      font-size: 15px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .assignment-details,
+    .release-details,
+    .outgoing-details {
+      border-left: 3px solid;
+      margin-left: 10px;
+      padding-left: 15px;
+    }
+
+    .assignment-details {
+      border-left-color: #FF9800;
+    }
+
+    .release-details {
+      border-left-color: #9C27B0;
+    }
+
+    .outgoing-details {
+      border-left-color: #3F51B5;
+    }
+
+    .sent-to-all-details {
+      border-left-color: #4CAF50;
+    }
+
+    #viewDocLink {
+      display: inline-block;
+      color: #4CAF50;
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1px solid #4CAF50;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    #viewDocLink:hover {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    /* Update modal content styles */
+    .modal-content {
+      max-width: 800px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Add smooth scrolling to modal */
+    .modal-content {
+      scroll-behavior: smooth;
+    }
+
+    /* Style scrollbar */
+    .modal-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .modal-content::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* Add these styles to your existing CSS */
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    /* Make certain fields span full width */
+    .detail-group:has(#viewContent),
+    .detail-group:has(#viewReleaseRemarks),
+    .detail-group:has(#viewOutgoingRemarks),
+    .detail-group:has(#viewDocLink) {
+      grid-column: 1 / -1;
+    }
+
+    /* Responsive grid */
+    @media (max-width: 992px) {
+      .details-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Update modal content max-width for better grid display */
+    .modal-content {
+      max-width: 1000px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 25px;
+    }
+
+    /* Enhance detail group styling for grid layout */
+    .detail-group {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px 15px;
+      transition: all 0.2s ease;
+    }
+
+    .detail-group:hover {
+      background-color: #f0f0f0;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .detail-group label {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .detail-group p {
+      margin: 0;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.5;
+      flex-grow: 1;
+    }
+
+    /* Update section styling */
+    .details-section {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .details-section h3 {
+      color: #2c3e50;
+      font-size: 18px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #4CAF50;
+    }
+
+    .details-section h4 {
+      color: #34495e;
+      font-size: 16px;
+      margin: 15px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* Update divider style */
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+      margin: 25px 0;
+    }
+
+    .action-button.done {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .action-button.done:hover {
+      background-color: #45a049;
+    }
+
+    .action-button.mark-done {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .action-button.mark-done:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Add Loading Spinner HTML -->
+  <div class="loading-overlay">
+    <div style="text-align: center;">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading documents...</div>
+    </div>
+  </div>
+
+  <div class="popup ">
+    <div class="popup2">
+      <div class="popup-header">
+        <h1>Document Information</h1>
+      </div>
+
+      <div class="popup3">
+        <p class="pupttl">Control #: </p>
+        <p class="pupttl">Received by: </p>
+        <p class="pupttl">Date: </p>
+        <p class="pupttl">Time: </p>
+        <p class="pupttl">Link: </p>
+        <p class="pupttl">Assigned to: </p>
+        <p class="pupttl">Status: </p>
+        <p class="pupttl">Date and Time Sent: </p>
+
+        <div class="button-group">
+          <button onclick="send()">Send</button>
+          <button onclick="save()">Save</button>
+          <button onclick="archive()">Archive</button>
+          <button onclick="closePopup()">Close</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="dashboard-header">
+    <div class="logo-container">
+      <img src="/img/HRIco.jpg" alt="HR Logo" />
+      <span style="font-weight: bold; color: white;">Human Resource Management & Development Office</span>
+    </div>
+    <div class="dashboard-profile">
+      <img src="/img/UserIco.png" alt="Profile" class="profile-icon" />
+      <div class="profile-name" onclick="toggleProfileMenu()" id="profileName">Loading...</div>
+      <ul class="profile-dropdown" id="profileMenu">
+        <li class="admin-only" style="display: none;"><a href="/web/manageaccounts.html">Manage Accounts</a></li>
+        <li><a href="#" onclick="logout()">Log Out</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <main class="dashboard-main">
+    <div class="dashboard-top">
+      <h1>Documents Dashboard</h1>
+      <div class="filter-buttons">
+        <button class="filter-btn" data-status="Pending">Pending</button>
+        <button class="filter-btn" data-status="Assigned">Assigned</button>
+        <button class="filter-btn" data-status="Archived">Archived</button>
+        <button class="filter-btn clear" id="clearFilter">Clear Filter</button>
+        <span class="filter-status" id="currentFilter">No active filter</span>
+      </div>
+      <div class="export-buttons">
+        <button class="send-btn" id="sendFileBtn">Upload File</button>
+      </div>
+    </div>
+    <!-- table1  -->
+    <div class="card-container">
+      <table id="mainDocumentsTable" class="documents-table display" style="width:100%">
+        <thead>
+          <tr>
+            <th>Control #</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Received From</th>
+            <th>Document Type</th>
+            <th>Content</th>
+            <th>Received By</th>
+            <th>Uploaded By</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- table2 for released and outgoing status documents only! -->
+    <div class="card-container admin-only" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="margin-bottom: 0;">Released & Outgoing Documents</h1>
+        <a href="/web/completedDocument.html" style="text-decoration: none; color: #4CAF50; font-weight: 500;">Completed Document</a>
+      </div>
+      <table id="releasedDocumentsTable" class="documents-table display" style="width:100%">
+        <thead>
+          <tr>
+            <th>Control #</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Source Address</th>
+            <th>Document Type</th>
+            <th>Content</th>
+            <th>Received By</th>
+            <th>Uploaded By</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <div id="editDocumentModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="$('#editDocumentModal').hide()">&times;</span>
+      <h2>Edit Document</h2>
+      <form id="editDocumentForm">
+        <input type="hidden" id="editDocId">
+        <div class="document-details">
+          <div class="detail-group full-width">
+            <label for="editControlNo">Control #:</label>
+            <div class="control-number-group">
+              <input type="text" id="editControlNoPrefix" class="control-number-prefix" disabled />
+              <input type="text" id="editControlNo" name="editControlNo" class="control-number-input" required placeholder="Enter number" />
+            </div>
+          </div>
+          <div class="detail-group">
+            <label for="editDate">Date:</label>
+            <input type="date" id="editDate" name="editDate" required />
+          </div>
+          <div class="detail-group">
+            <label for="editTime">Time:</label>
+            <input type="time" id="editTime" name="editTime" required />
+          </div>
+          <div class="detail-group">
+            <label for="editSourceAddress">Received From:</label>
+            <input type="text" id="editSourceAddress" name="editSourceAddress" required />
+          </div>
+          <div class="detail-group">
+            <label for="editDocType">Document Type:</label>
+            <input type="text" id="editDocType" name="editDocType" required placeholder="Enter document type" />
+          </div>
+          <div class="detail-group">
+            <label for="editContent">Content:</label>
+            <input type="text" id="editContent" name="editContent" required />
+          </div>
+          <div class="detail-group">
+            <label for="editReceivedBy">Received By:</label>
+            <input type="text" id="editReceivedBy" name="editReceivedBy" required />
+          </div>
+          <div class="detail-group">
+            <label for="editUploadedBy">Uploaded By:</label>
+            <input type="text" id="editUploadedBy" name="editUploadedBy" required />
+          </div>
+          <div class="detail-group">
+            <label for="editDocLink">Document Link:</label>
+            <input type="url" id="editDocLink" name="editDocLink" placeholder="Paste document link here" required />
+          </div>
+          <div class="detail-group">
+            <label>Status:</label>
+            <div class="status-display">
+              <span id="editStatusLabel" class="status-label"></span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-buttons">
+          <button type="submit" class="action-button edit">Save Changes</button>
+          <button type="button" class="action-button" onclick="$('#editDocumentModal').hide()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Archive Confirmation Modal -->
+  <div id="archiveModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="$('#archiveModal').hide()">&times;</span>
+      <h2>Archive Document</h2>
+      <p>Are you sure you want to archive this document?</p>
+      <input type="hidden" id="archiveDocId">
+      <div class="modal-buttons">
+        <button onclick="confirmArchive()" class="action-button archive">Yes, Archive</button>
+        <button onclick="$('#archiveModal').hide()" class="action-button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="$('#deleteModal').hide()">&times;</span>
+      <h2>Delete Document</h2>
+      <p>Are you sure you want to delete this document? This action cannot be undone.</p>
+      <input type="hidden" id="deleteDocId">
+      <div class="modal-buttons">
+        <button onclick="confirmDelete()" class="action-button delete">Yes, Delete</button>
+        <button onclick="$('#deleteModal').hide()" class="action-button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send File Modal -->
+  <div id="sendFileModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="hideModal('sendFileModal')">&times;</span>
+      <h2>Upload Document</h2>
+      <form id="sendFileForm">
+        <div class="document-details">
+          <div class="detail-group full-width">
+            <label for="controlNo">Control #:</label>
+            <div class="control-number-group">
+              <input type="text" id="controlNoPrefix" class="control-number-prefix" disabled />
+              <input type="text" id="controlNo" name="controlNo" class="control-number-input" required placeholder="Enter number" />
+            </div>
+          </div>
+          <div class="detail-group">
+            <label for="docDate">Date:</label>
+            <input type="date" id="docDate" name="docDate" required />
+          </div>
+          <div class="detail-group">
+            <label for="docTime">Time:</label>
+            <input type="time" id="docTime" name="docTime" required />
+          </div>
+          <div class="detail-group">
+            <label for="sourceAddress">Received From:</label>
+            <input type="text" id="sourceAddress" name="sourceAddress" required />
+          </div>
+          <div class="detail-group">
+            <label for="docType">Document Type:</label>
+            <input type="text" id="docType" name="docType" required placeholder="Enter document type" />
+          </div>
+          <div class="detail-group">
+            <label for="content">Content:</label>
+            <input type="text" id="content" name="content" required />
+          </div>
+          <div class="detail-group">
+            <label for="receivedBy">Received By:</label>
+            <input type="text" id="receivedBy" name="receivedBy" required />
+          </div>
+          <div class="detail-group">
+            <label for="uploadedBy">Uploaded By:</label>
+            <input type="text" id="uploadedBy" name="uploadedBy" required />
+          </div>
+          <div class="detail-group">
+            <label for="docLink">Document Link:</label>
+            <input type="url" id="docLink" name="docLink" placeholder="Paste document link here" required />
+          </div>
+        </div>
+        <button type="submit">Upload Document</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Document Modal -->
+  <div id="viewDocumentModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="$('#viewDocumentModal').hide()">&times;</span>
+      <h2>Document Details</h2>
+      <div style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
+        <!-- Basic Details Section -->
+        <div class="details-section" style="width: 100%;">
+          <h3>Basic Details</h3>
+          <div class="details-grid">
+            
+            <div class="detail-group">
+              <label>Document Link:</label>
+              <a id="viewDocLink" href="#" target="_blank">Open Document</a>
+            </div>
+            <div class="detail-group">
+              <label>Control #:</label>
+              <p id="viewControlNo"></p>
+            </div>
+            <div class="detail-group">
+              <label>Date:</label>
+              <p id="viewDate"></p>
+            </div>
+            <div class="detail-group">
+              <label>Time:</label>
+              <p id="viewTime"></p>
+            </div>
+            <div class="detail-group">
+              <label>Received From:</label>
+              <p id="viewSourceAddress"></p>
+            </div>
+            <div class="detail-group">
+              <label>Document Type:</label>
+              <p id="viewDocType"></p>
+            </div>
+            <div class="detail-group">
+              <label>Content:</label>
+              <p id="viewContent"></p>
+            </div>
+            <div class="detail-group">
+              <label>Received By:</label>
+              <p id="viewReceivedBy"></p>
+            </div>
+            <div class="detail-group">
+              <label>Uploaded By:</label>
+              <p id="viewUploadedBy"></p>
+            </div>
+            <div class="detail-group">
+              <label>Status:</label>
+              <p id="viewStatus"></p>
+            </div>
+          </div>
+        </div>
+        <!-- Assignment and Release Section -->
+        <div class="details-section" style="width: 100%;">
+          <h3>Assignment & Release Details</h3>
+          <!-- Assignment Details Section -->
+          <div id="assignmentDetailsSection" style="display: none;">
+            <div class="details-grid">
+              <div class="detail-group assignment-details">
+                <label>Assigned To:</label>
+                <p id="viewAssignedTo"></p>
+              </div>
+              <div class="detail-group assignment-details">
+                <label>Assigned Date:</label>
+                <p id="viewAssignedDate"></p>
+              </div>
+              <div class="detail-group assignment-details">
+                <label>Assigned Time:</label>
+                <p id="viewAssignedTime"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Release Details Section -->
+          <div id="releaseDetailsSection" style="display: none;">
+            <div class="details-grid">
+              <div class="detail-group release-details">
+                <label>Released By:</label>
+                <p id="viewReleasedBy"></p>
+              </div>
+              <div class="detail-group release-details">
+                <label>Released Date:</label>
+                <p id="viewReleasedDate"></p>
+              </div>
+              <div class="detail-group release-details">
+                <label>Released Time:</label>
+                <p id="viewReleasedTime"></p>
+              </div>
+              <div class="detail-group release-details release-remarks">
+                <label>Release Remarks:</label>
+                <p id="viewReleaseRemarks"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sent to All Details Section -->
+          <div id="sentToAllDetailsSection" style="display: none;">
+            <h4>Shared Information</h4>
+            <div class="details-grid">
+              <div class="detail-group sent-to-all-details">
+                <label>Sent to All Employees:</label>
+                <p id="viewSentToAllDate"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outgoing Section -->
+        <div class="details-section" style="width: 100%;">
+          <h3>Outgoing Details</h3>
+          <div id="outgoingDetailsSection" style="display: none;">
+
+            <div class="detail-group">
+              <label>Outgoing Document Link:</label>
+              <a id="outgoingDocLink" href="#" target="_blank">Open Document</a>
+            </div>
+            <div class="details-grid">
+              <div class="detail-group outgoing-details">
+                <label>Outgoing Received By:</label>
+                <p id="viewOutgoingReceivedBy"></p>
+              </div>
+              <div class="detail-group outgoing-details">
+                <label>Outgoing Date:</label>
+                <p id="viewOutgoingDate"></p>
+              </div>
+              <div class="detail-group outgoing-details">
+                <label>Outgoing Time:</label>
+                <p id="viewOutgoingTime"></p>
+              </div>
+              <div class="detail-group outgoing-details outgoing-remarks">
+                <label>Outgoing Remarks:</label>
+                <p id="viewOutgoingRemarks"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button onclick="$('#viewDocumentModal').hide()" class="action-button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Document Modal -->
+  <div id="assignModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="$('#assignModal').hide()">&times;</span>
+      <h2>Assign Document</h2>
+      <form id="assignDocumentForm">
+        <input type="hidden" id="assignDocId">
+        <div class="document-details">
+          <div class="detail-group">
+            <label for="assignToUser">Assign to:</label>
+            <select id="assignToUser" name="assignToUser" class="select2" required>
+              <option value="">Select a user...</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-buttons">
+          <button type="submit" class="action-button assign">Assign Document</button>
+          <button type="button" class="action-button" onclick="$('#assignModal').hide()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Release Confirmation Modal -->
+  <div id="releaseModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="$('#releaseModal').hide()">&times;</span>
+      <h2>Release Document</h2>
+      <p>Please enter who is releasing this document:</p>
+      <form id="releaseForm">
+        <input type="hidden" id="releaseDocId">
+        <div class="document-details">
+          <div class="detail-group">
+            <label for="releasedBy">Released by: <span class="required">*</span></label>
+            <input type="text" id="releasedBy" name="releasedBy" required placeholder="Enter name of person releasing">
+          </div>
+          <div class="detail-group" style="margin-top: 15px;">
+            <label for="releaseRemarks">Release Remarks:</label>
+            <textarea id="releaseRemarks" name="releaseRemarks" rows="4" placeholder="Enter release remarks"></textarea>
+          </div>
+        </div>
+        <div class="modal-buttons">
+          <button type="submit" class="action-button release">Confirm Release</button>
+          <button type="button" class="action-button" onclick="$('#releaseModal').hide()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add status message div -->
+  <div id="statusMessage" style="display: none; position: fixed; top: 20px; right: 20px; padding: 15px; border-radius: 4px; z-index: 9999;"></div>
+
+  <!-- Send to All Confirmation Modal -->
+  <div id="sendToAllModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="$('#sendToAllModal').hide()">&times;</span>
+      <h2>Send Document to All Employees</h2>
+      <p>Are you sure you want to make this document accessible to all employees?</p>
+      <div class="confirmation-checkbox">
+        <input type="checkbox" id="confirmSendToAll">
+        <label for="confirmSendToAll">Yes, I confirm that I want to send this document to all employees</label>
+      </div>
+      <input type="hidden" id="sendToAllDocId">
+      <div class="modal-buttons">
+        <button onclick="confirmSendToAll()" class="action-button send-to-all" disabled id="confirmSendToAllBtn">Send All</button>
+        <button onclick="$('#sendToAllModal').hide()" class="action-button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outgoing Document Modal -->
+  <div id="outgoingModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="$('#outgoingModal').hide()">&times;</span>
+      <h2>Mark Document as Outgoing</h2>
+      <form id="outgoingForm">
+        <input type="hidden" id="outgoingDocId">
+        <div class="document-details">
+          <div class="detail-group">
+            <label for="outgoingReceivedBy">Received By: <span class="required">*</span></label>
+            <input type="text" id="outgoingReceivedBy" name="outgoingReceivedBy" required placeholder="Enter name of receiver">
+          </div>
+          <div class="detail-group">
+            <label for="outgoingDate">Date: <span class="required">*</span></label>
+            <input type="date" id="outgoingDate" name="outgoingDate" required>
+          </div>
+          <div class="detail-group">
+            <label for="outgoingTime">Time: <span class="required">*</span></label>
+            <input type="time" id="outgoingTime" name="outgoingTime" required>
+          </div>
+          <div class="detail-group">
+            <label for="outgoingLink">New Document Link: <span class="required">*</span></label>
+            <input type="url" id="outgoingLink" name="outgoingLink" required placeholder="Enter new document link">
+          </div>
+          <div class="detail-group">
+            <label for="outgoingRemarks">Remarks:</label>
+            <textarea id="outgoingRemarks" name="outgoingRemarks" rows="4" placeholder="Enter remarks"></textarea>
+          </div>
+        </div>
+        <div class="modal-buttons">
+          <button type="submit" class="action-button outgoing">Mark as Outgoing</button>
+          <button type="button" class="action-button" onclick="$('#outgoingModal').hide()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mark as Done Confirmation Modal -->
+  <div id="markDoneModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="$('#markDoneModal').hide()">&times;</span>
+      <h2>Mark Document as Completed</h2>
+      <p>Are you sure you want to mark this document as Completed? This action cannot be undone and the document will no longer appear in any table.</p>
+      <input type="hidden" id="markDoneDocId">
+      <div class="modal-buttons">
+        <button onclick="confirmMarkDone()" class="action-button done">Yes, Mark as Completed</button>
+        <button onclick="$('#markDoneModal').hide()" class="action-button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { app, db, collection, onSnapshot, fsQuery, doc, deleteDoc, getFirestore, updateDoc, getDoc, addDoc, where, auth, signOut, getDocs } from '../src/client/cli.mjs';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check for user session
+      const checkSession = () => {
+        const userSession = sessionStorage.getItem('userSession');
+        if (!userSession) {
+          window.location.href = '/web/userlogin.html';
+          return;
+        }
+        
+        const userData = JSON.parse(userSession);
+        // Update profile name with username and role
+        const profileNameElement = document.getElementById('profileName');
+        profileNameElement.innerHTML = `${userData.username}<br><small style="font-size: 0.8em;">${userData.role.toUpperCase()}</small>`;
+        updateAdminFeatures(userData);
+      };
+
+      // Initialize session check
+      checkSession();
+
+      // Add logout function
+      window.logout = async function() {
+        try {
+          // Clear session storage
+          sessionStorage.clear();
+          localStorage.clear();
+          
+          // Sign out from Firebase
+          if (auth) {
+            await signOut(auth);
+          }
+          
+          // Redirect to login page
+          window.location.href = '/web/userlogin.html';
+        } catch (error) {
+          console.error('Error during logout:', error);
+          // Still redirect even if there's an error
+          window.location.href = '/web/userlogin.html';
+        }
+      };
+
+      // Profile menu toggle
+      window.toggleProfileMenu = function() {
+        const menu = document.getElementById('profileMenu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      };
+
+      // Function to check user role and show/hide admin features
+      function updateAdminFeatures(userSession) {
+        const adminElements = document.querySelectorAll('.admin-only');
+        const isAdmin = userSession.role.toLowerCase() === 'admin';
+        
+        adminElements.forEach(element => {
+          element.style.display = isAdmin ? 'block' : 'none';
+        });
+      }
+
+      // Close profile menu when clicking outside
+      document.addEventListener('click', function(event) {
+        const profileMenu = document.getElementById('profileMenu');
+        const profileName = document.getElementById('profileName');
+        
+        if (!profileName.contains(event.target) && !profileMenu.contains(event.target)) {
+          profileMenu.style.display = 'none';
+        }
+      });
+
+      // Add styles for profile menu
+      const profileStyles = document.createElement('style');
+      profileStyles.textContent = `
+        .dashboard-profile {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .profile-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+
+        .profile-name {
+          color: white;
+          cursor: pointer;
+          padding: 5px 10px;
+          border-radius: 4px;
+          transition: background-color 0.3s;
+          text-align: right;
+          line-height: 1.2;
+        }
+
+        .profile-name small {
+          opacity: 0.9;
+          display: block;
+        }
+
+        .profile-name:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-dropdown {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          background: white;
+          border-radius: 4px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          display: none;
+          list-style: none;
+          padding: 0;
+          margin: 5px 0 0 0;
+          min-width: 150px;
+          z-index: 1000;
+        }
+
+        .profile-dropdown li {
+          margin: 0;
+          padding: 0;
+        }
+
+        .profile-dropdown li a {
+          display: block;
+          padding: 10px 15px;
+          color: #333;
+          text-decoration: none;
+          transition: background-color 0.3s;
+        }
+
+        .profile-dropdown li a:hover {
+          background-color: #f8f9fa;
+        }
+      `;
+      document.head.appendChild(profileStyles);
+
+      // Function to show loading spinner
+      function showLoading() {
+        const loader = document.querySelector('.loading-overlay');
+        loader.style.display = 'flex';
+      }
+
+      // Function to hide loading spinner
+      function hideLoading() {
+        const loader = document.querySelector('.loading-overlay');
+        loader.style.display = 'none';
+      }
+
+      // Function to show status message
+      function showStatus(message, isError = false) {
+        const statusDiv = document.getElementById('statusMessage');
+        if (statusDiv) {
+          statusDiv.textContent = message;
+          statusDiv.style.display = 'block';
+          statusDiv.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
+          statusDiv.style.color = isError ? '#721c24' : '#155724';
+          statusDiv.style.border = `1px solid ${isError ? '#f5c6cb' : '#c3e6cb'}`;
+          
+          // Hide after 3 seconds
+          setTimeout(() => {
+            statusDiv.style.display = 'none';
+          }, 3000);
+        }
+      }
+
+      // Make functions available to window object
+      window.showLoading = showLoading;
+      window.hideLoading = hideLoading;
+      window.showStatus = showStatus;
+      window.showModal = showModal;
+      window.hideModal = hideModal;
+      window.getCurrentDatePrefix = getCurrentDatePrefix;
+      window.formatDate = formatDate;
+      window.formatTime = formatTime;
+
+      // Function to load documents from Firestore
+      async function loadDocuments() {
+        console.log('Starting to load documents...');
+        showLoading();
+
+        try {
+          await new Promise(resolve => {
+            const checkDb = () => {
+              if (db) {
+                console.log('Firestore instance ready');
+                resolve();
+              } else {
+                console.log('Waiting for Firestore initialization...');
+                setTimeout(checkDb, 100);
+              }
+            };
+            checkDb();
+          });
+
+          const userSession = JSON.parse(sessionStorage.getItem('userSession'));
+          if (!userSession) {
+            window.location.href = '/web/userlogin.html';
+            return;
+          }
+
+          const docuRef = collection(db, 'docu');
+          
+          // Listen to all documents and filter in memory for better query handling
+          const unsubscribe = onSnapshot(docuRef, (snapshot) => {
+            console.log('Snapshot received:', snapshot.size, 'documents');
+            const documents = [];
+            
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              
+              // Skip deleted documents unless searching
+              if (data.deleted && !$('.dataTables_filter input').val()) {
+                return;
+              }
+
+              // For non-admin users, show documents that are either:
+              // 1. Assigned to them directly OR
+              // 2. Marked as forAll AND not archived/deleted
+              if (userSession.role.toLowerCase() !== 'admin') {
+                if (!data.forAll && data.assignedTo !== userSession.id) {
+                  return;
+                }
+                if (data.forAll && (data.archived || data.deleted)) {
+                  return;
+                }
+              }
+
+              // Use status as is, without adding the suffix
+              let status = data.status?.toString() || 'Pending';
+
+              documents.push({
+                id: doc.id,
+                controlNo: data.controlNo?.toString() || '',
+                date: data.date?.toString() || '',
+                time: data.time?.toString() || '',
+                sourceAddress: data.sourceAddress?.toString() || '',
+                document_type: data.document_type?.toString() || '',
+                content: data.content?.toString() || '',
+                receivedBy: data.receivedBy?.toString() || '',
+                uploadedBy: data.uploadedBy?.toString() || '',
+                status: status,
+                archived: Boolean(data.archived),
+                deleted: Boolean(data.deleted),
+                forAll: Boolean(data.forAll),
+                sentToAllAt: data.sentToAllAt || null,
+                previousStatus: data.previousStatus || null
+              });
+            });
+            
+            console.log('Processed documents:', documents);
+            updateDataTable(documents);
+            hideLoading();
+          }, (error) => {
+            console.error("Error fetching documents: ", error);
+            hideLoading();
+          });
+
+          window.addEventListener('unload', () => {
+            hideLoading();
+            unsubscribe();
+          });
+        } catch (error) {
+          console.error('Error in loadDocuments:', error);
+          hideLoading();
+        }
+      }
+
+      // Function to format date and time
+      function formatDate(dateStr) {
+        if (!dateStr) return '';
+        try {
+          return String(dateStr);
+        } catch (error) {
+          console.error('Error formatting date:', error);
+          return '';
+        }
+      }
+
+      function formatTime(timeStr) {
+        if (!timeStr) return '';
+        try {
+          // Create a Date object using the time string
+          const date = new Date(`1970-01-01T${timeStr}`);
+          // Format to 12-hour time with AM/PM
+          return date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+          });
+        } catch (error) {
+          console.error('Error formatting time:', error);
+          return '';
+        }
+      }
+
+      // Function to initialize or update DataTable
+      function updateDataTable(data) {
+        const mainTable = $('#mainDocumentsTable');
+        const releasedTable = $('#releasedDocumentsTable');
+        
+        // Filter out documents with Done status
+        const activeDocuments = data.filter(doc => doc.status !== 'Completed');
+        
+        // Split remaining data between tables
+        const mainDocuments = activeDocuments.filter(doc => {
+          const status = doc.status?.toLowerCase() || '';
+          return !status.includes('released') && !status.includes('outgoing');
+        });
+        
+        const releasedDocuments = activeDocuments.filter(doc => {
+          const status = doc.status?.toLowerCase() || '';
+          return status.includes('released') || status.includes('outgoing');
+        });
+        
+        // Destroy existing DataTables if they exist
+        if ($.fn.DataTable.isDataTable(mainTable)) {
+          mainTable.DataTable().destroy();
+        }
+        if ($.fn.DataTable.isDataTable(releasedTable)) {
+          releasedTable.DataTable().destroy();
+        }
+        
+        mainTable.empty();
+        releasedTable.empty();
+
+        const userSession = JSON.parse(sessionStorage.getItem('userSession'));
+        const isAdmin = userSession.role.toLowerCase() === 'admin';
+
+        // Initialize main documents table
+        const mainDataTable = mainTable.DataTable({
+          data: mainDocuments,
+          columns: [
+            { data: 'controlNo', title: 'Control #', defaultContent: '' },
+            { 
+              data: 'date',
+              title: 'Date',
+              defaultContent: '',
+              render: function(data) {
+                return data ? data.toString() : '';
+              }
+            },
+            { 
+              data: 'time',
+              title: 'Time',
+              defaultContent: '',
+              render: function(data) {
+                return data ? data.toString() : '';
+              }
+            },
+            { data: 'sourceAddress', title: 'Received From', defaultContent: '' },
+            { data: 'document_type', title: 'Document Type', defaultContent: '' },
+            { data: 'content', title: 'Content', defaultContent: '' },
+            { data: 'receivedBy', title: 'Received By', defaultContent: '' },
+            { data: 'uploadedBy', title: 'Uploaded By', defaultContent: '' },
+            { 
+              data: 'status',
+              title: 'Status',
+              defaultContent: 'Pending',
+              render: function(data, type, row) {
+                if (type === 'display') {
+                  const status = data || 'Pending';
+                  const statusClass = status.replace(/\s+/g, '-');
+                  return `<span class="status-label status-${statusClass}">${status}</span>`;
+                }
+                return data;
+              }
+            },
+            {
+              data: 'id',
+              title: 'Action',
+              orderable: false,
+              searchable: false,
+              exportable: false,
+              className: 'action-column',
+              render: function(data, type, row) {
+                if (type === 'print') {
+                  return ''; // Return empty string for print view
+                }
+                if (type === 'display') {
+                  // Check if status contains 'Assigned' or starts with 'Assigned to'
+                  const isAssigned = row.status && (
+                    row.status.includes('Assigned') || 
+                    row.status.toLowerCase().startsWith('assigned to')
+                  );
+                  
+                  const userSession = JSON.parse(sessionStorage.getItem('userSession'));
+                  const isAdmin = userSession.role.toLowerCase() === 'admin';
+                  
+                  // Check if document is pending and not already shared
+                  const isPending = row.status === 'Pending';
+                  const isNotShared = !row.forAll;
+                  const canSendToAll = isPending && isNotShared;
+                  
+                  // Check if document is shared to all
+                  const isSharedToAll = row.status === 'Shared to All';
+                  
+                  if (row.deleted) {
+                    return `
+                      <div class="action-buttons">
+                        <button onclick="viewDocument('${data}')" class="action-button view">View</button>
+                        ${isAdmin ? `
+                          <button onclick="restoreDocument('${data}')" class="action-button restore">Restore</button>
+                        ` : ''}
+                      </div>
+                    `;
+                  } else if (!row.archived) {
+                    return `
+                      <div class="action-buttons">
+                        <button onclick="viewDocument('${data}')" class="action-button view">View</button>
+                        ${isAdmin ? `
+                          <div class="btn-group action-group">
+                            <button type="button" class="action-button dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                              <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                              <a class="dropdown-item" href="#" onclick="editDocument('${data}'); return false;">Edit</a>
+                              <a class="dropdown-item archive" href="#" onclick="archiveDocument('${data}'); return false;">Archive</a>
+                              <a class="dropdown-item delete" href="#" onclick="deleteDocument('${data}'); return false;">Delete</a>
+                            </div>
+                          </div>
+                          ${!isSharedToAll ? `<button onclick="assignDocument('${data}')" class="action-button assign">Assign</button>` : ''}
+                          ${isAssigned ? `<button onclick="showReleaseModal('${data}')" class="action-button for-release">Release</button>` : ''}
+                          ${canSendToAll ? `<button onclick="showSendToAllModal('${data}')" class="action-button send-to-all">Send All</button>` : ''}
+                        ` : isAssigned ? `
+                          <button onclick="showReleaseModal('${data}')" class="action-button for-release">Release</button>
+                        ` : ''}
+                      </div>
+                    `;
+                  } else {
+                    return `
+                      <div class="action-buttons">
+                        <button onclick="viewDocument('${data}')" class="action-button view">View</button>
+                        ${isAdmin ? `
+                          <div class="btn-group action-group">
+                            <button type="button" class="action-button dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                              <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                              <a class="dropdown-item" href="#" onclick="unarchiveDocument('${data}'); return false;">Unarchive</a>
+                              <a class="dropdown-item delete" href="#" onclick="deleteDocument('${data}'); return false;">Delete</a>
+                            </div>
+                          </div>
+                        ` : ''}
+                      </div>
+                    `;
+                  }
+                }
+                return data;
+              }
+            }
+          ],
+          order: [[1, 'desc']],
+          dom: isAdmin ? 'Bfrtip' : 'frtip',
+          buttons: [
+            {
+              extend: 'excel',
+              exportOptions: {
+                columns: ':not(.action-column)'
+              }
+            },
+            {
+              extend: 'pdf',
+              exportOptions: {
+                columns: ':not(.action-column)'
+              }
+            },
+            {
+              extend: 'print',
+              exportOptions: {
+                columns: ':not(.action-column)'
+              }
+            }
+          ]
+        });
+
+        // Initialize released documents table
+        const releasedDataTable = releasedTable.DataTable({
+          data: releasedDocuments,
+          columns: [
+            { data: 'controlNo', title: 'Control #', defaultContent: '' },
+            { 
+              data: 'date',
+              title: 'Date',
+              defaultContent: '',
+              render: function(data) {
+                return data ? data.toString() : '';
+              }
+            },
+            { 
+              data: 'time',
+              title: 'Time',
+              defaultContent: '',
+              render: function(data) {
+                return data ? data.toString() : '';
+              }
+            },
+            { data: 'sourceAddress', title: 'Received From', defaultContent: '' },
+            { data: 'document_type', title: 'Document Type', defaultContent: '' },
+            { data: 'content', title: 'Content', defaultContent: '' },
+            { data: 'receivedBy', title: 'Received By', defaultContent: '' },
+            { data: 'uploadedBy', title: 'Uploaded By', defaultContent: '' },
+            { 
+              data: 'status',
+              title: 'Status',
+              defaultContent: '',
+              render: function(data, type, row) {
+                if (type === 'display') {
+                  const statusClass = data.replace(/\s+/g, '-');
+                  return `<span class="status-label status-${statusClass}">${data}</span>`;
+                }
+                return data;
+              }
+            },
+            {
+              data: 'id',
+              title: 'Action',
+              orderable: false,
+              searchable: false,
+              exportable: false,
+              className: 'action-column',
+              render: function(data, type, row) {
+                if (type === 'display') {
+                  const isReleased = row.status && row.status.toLowerCase().includes('released');
+                  const isOutgoing = row.status && row.status.toLowerCase().includes('outgoing');
+                  return `
+                    <div class="action-buttons">
+                      <button onclick="viewDocument('${data}')" class="action-button view">View</button>
+                      ${isReleased ? `<button onclick="showOutgoingModal('${data}')" class="action-button for-outgoing">For Outgoing</button>` : ''}
+                      ${isOutgoing ? `<button onclick="showMarkDoneModal('${data}')" class="action-button mark-done">Mark Completed</button>` : ''}
+                    </div>
+                  `;
+                }
+                return data;
+              }
+            }
+          ],
+          order: [[1, 'desc']],
+          dom: 'Bfrtip',
+          buttons: [
+            {
+              extend: 'excel',
+              exportOptions: {
+                columns: ':not(.action-column)'
+              }
+            },
+            {
+              extend: 'pdf',
+              exportOptions: {
+                columns: ':not(.action-column)'
+              }
+            },
+            {
+              extend: 'print',
+              exportOptions: {
+                columns: ':not(.action-column)'
+              }
+            }
+          ]
+        });
+
+        // Add custom search class to both tables
+        $('.dataTables_filter input').addClass('custom-search');
+        
+        // Hide upload button for non-admin users
+        if (!isAdmin) {
+          $('#sendFileBtn').hide();
+        }
+
+        // Apply initial filter state if exists
+        if (currentFilter) {
+          applyFilter(currentFilter);
+        }
+      }
+
+      // Update the applyFilter function to work with the main table only
+      function applyFilter(status) {
+        const table = $('#mainDocumentsTable').DataTable();
+        
+        if (status) {
+          if (status === 'Archived') {
+            table.rows().every(function() {
+              const data = this.data();
+              if (data.archived) {
+                $(this.node()).show();
+              } else {
+                $(this.node()).hide();
+              }
+            });
+          } else if (status === 'Assigned') {
+            table.rows().every(function() {
+              const data = this.data();
+              const isAssigned = data.status && data.status.toLowerCase().includes('assigned');
+              if (isAssigned && !data.archived) {
+                $(this.node()).show();
+              } else {
+                $(this.node()).hide();
+              }
+            });
+          } else if (status === 'Pending') {
+            table.rows().every(function() {
+              const data = this.data();
+              const isPending = data.status === 'Pending';
+              if (isPending && !data.archived) {
+                $(this.node()).show();
+              } else {
+                $(this.node()).hide();
+              }
+            });
+          }
+        } else {
+          table.rows().every(function() {
+            const data = this.data();
+            if (!data.archived && !data.deleted) {
+              $(this.node()).show();
+            } else {
+              $(this.node()).hide();
+            }
+          });
+        }
+        
+        table.draw();
+      }
+
+      // Function to handle form submission
+      const sendFileForm = document.getElementById('sendFileForm');
+      if (sendFileForm) {
+        sendFileForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          showLoading();
+
+          try {
+            const formData = {
+              controlNo: `${$('#controlNoPrefix').val()}-${$('#controlNo').val()}`,
+              date: $('#docDate').val(),
+              time: $('#docTime').val(),
+              sourceAddress: $('#sourceAddress').val(),
+              document_type: $('#docType').val(),
+              content: $('#content').val(),
+              receivedBy: $('#receivedBy').val(),
+              uploadedBy: $('#uploadedBy').val(),
+              docLink: $('#docLink').val(),
+              status: 'Pending',
+              createdAt: new Date().toISOString()
+            };
+
+            await addDoc(collection(db, 'docu'), formData);
+            
+            // Clear form fields
+            $('#sendFileForm')[0].reset();
+            $('#controlNoPrefix').val(getCurrentDatePrefix());
+            
+            // Close modal with fade effect
+            $('#sendFileModal').fadeOut(300);
+            showStatus('Document uploaded successfully!');
+
+            // Refresh the table
+            await loadDocuments();
+          } catch (error) {
+            console.error('Error uploading document:', error);
+            showStatus('Error uploading document. Please try again.', true);
+          } finally {
+            hideLoading();
+          }
+        });
+      }
+
+      // Function to handle edit form submission
+      $('#editDocumentForm').on('submit', async function(e) {
+        e.preventDefault();
+        showLoading();
+
+        try {
+          const id = $('#editDocId').val();
+          const docRef = doc(db, 'docu', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (!docSnap.exists()) {
+            throw new Error('Document not found');
+          }
+
+          const currentData = docSnap.data();
+
+          const updatedData = {
+            controlNo: `${$('#editControlNoPrefix').val()}-${$('#editControlNo').val()}`,
+            date: $('#editDate').val(),
+            time: $('#editTime').val(),
+            sourceAddress: $('#editSourceAddress').val(),
+            document_type: $('#editDocType').val(),
+            content: $('#editContent').val(),
+            receivedBy: $('#editReceivedBy').val(),
+            uploadedBy: $('#editUploadedBy').val(),
+            docLink: $('#editDocLink').val(),
+            status: currentData.status, // Maintain the current status
+            lastModified: new Date().toISOString()
+          };
+
+          await updateDoc(docRef, updatedData);
+          
+          // Clear form fields
+          $('#editDocumentForm')[0].reset();
+          
+          // Close modal with fade effect
+          $('#editDocumentModal').fadeOut(300);
+          showStatus('Document updated successfully!');
+          await loadDocuments();
+        } catch (error) {
+          console.error('Error updating document:', error);
+          showStatus('Error updating document. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      });
+
+      // Function to edit document
+      window.editDocument = async function(id) {
+        try {
+          showLoading();
+          const docRef = doc(db, 'docu', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            
+            // Get the last part of the control number (after the last dash)
+            const controlNo = data.controlNo || '';
+            const parts = controlNo.split('-');
+            const prefix = `${parts[0]}-${parts[1]}-INC`; // Get "YYYY-MM-INC"
+            const suffix = parts[3] || ''; // Get the last part after INC
+            
+            // Populate form fields
+            $('#editDocId').val(id);
+            $('#editControlNoPrefix').val(prefix);
+            $('#editControlNo').val(suffix);
+            
+            // Handle date and time
+            $('#editDate').val(formatDate(data.date));
+            $('#editTime').val(formatTime(data.time));
+            
+            $('#editSourceAddress').val(data.sourceAddress || '');
+            $('#editDocType').val(data.document_type || '');
+            $('#editContent').val(data.content || '');
+            $('#editReceivedBy').val(data.receivedBy || '');
+            $('#editUploadedBy').val(data.uploadedBy || '');
+            $('#editDocLink').val(data.docLink || '');
+            
+            // Set status label with appropriate class
+            const status = data.status || 'Pending';
+            const statusLabel = $('#editStatusLabel');
+            statusLabel
+              .text(status)
+              .removeClass()
+              .addClass(`status-label status-${status.replace(/\s+/g, '-')}`);
+            
+            showModal('editDocumentModal');
+          }
+        } catch (error) {
+          console.error('Error loading document:', error);
+          showStatus('Error loading document. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      };
+
+      window.archiveDocument = function(id) {
+        $('#archiveDocId').val(id);
+        $('#archiveModal').show();
+      };
+
+      window.confirmArchive = async function() {
+        const id = $('#archiveDocId').val();
+        showLoading();
+        
+        try {
+          const docRef = doc(db, 'docu', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const currentData = docSnap.data();
+            await updateDoc(docRef, {
+              archived: true,
+              previousStatus: currentData.status, // Save the current status
+              status: 'Archived',
+              archivedAt: new Date().toISOString()
+            });
+          }
+          
+          $('#archiveModal').hide();
+          showStatus('Document archived successfully!');
+        } catch (error) {
+          console.error('Error archiving document:', error);
+          showStatus('Error archiving document. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      };
+
+      // Update unarchive functionality
+      window.unarchiveDocument = async function(id) {
+        try {
+          showLoading();
+          const docRef = doc(db, 'docu', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const previousStatus = data.previousStatus || 'Pending'; // Default to Pending if no previous status
+            
+            await updateDoc(docRef, {
+              archived: false,
+              status: previousStatus,
+              previousStatus: null, // Clear the previous status field
+              unarchivedAt: new Date().toISOString()
+            });
+          }
+          
+          showStatus('Document unarchived successfully!');
+        } catch (error) {
+          console.error('Error unarchiving document:', error);
+          showStatus('Error unarchiving document. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      };
+
+      window.deleteDocument = function(id) {
+        $('#deleteDocId').val(id);
+        $('#deleteModal').show();
+      };
+
+      window.confirmDelete = async function() {
+        const id = $('#deleteDocId').val();
+        showLoading();
+        
+        try {
+          const docRef = doc(db, 'docu', id);
+          await updateDoc(docRef, {
+            deleted: true,
+            deletedAt: new Date().toISOString(),
+            status: 'Deleted'
+          });
+          
+          $('#deleteModal').hide();
+          showStatus('Document moved to trash successfully!');
+        } catch (error) {
+          console.error('Error deleting document:', error);
+          showStatus('Error moving document to trash. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      };
+
+      // Update restore functionality to handle status properly
+      window.restoreDocument = async function(id) {
+        try {
+          showLoading();
+          const docRef = doc(db, 'docu', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            let restoredStatus = data.previousStatus || 'Pending';
+            
+            // If document was archived when deleted, keep it archived
+            if (data.archived) {
+              restoredStatus = 'Archived';
+            }
+            
+            await updateDoc(docRef, {
+              deleted: false,
+              status: restoredStatus,
+              restoredAt: new Date().toISOString()
+            });
+          }
+          
+          showStatus('Document restored successfully!');
+        } catch (error) {
+          console.error('Error restoring document:', error);
+          showStatus('Error restoring document. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      };
+
+      // Add modal close handlers
+      $('.close-btn, .modal').on('click', function(e) {
+        if (e.target === this) {
+          $(this).closest('.modal').hide();
+        }
+      });
+
+      // Add CSS for modal buttons
+      const modalStyle = document.createElement('style');
+      modalStyle.textContent = `
+        .modal-buttons {
+          display: flex;
+          gap: 10px;
+          justify-content: flex-end;
+          margin-top: 20px;
+        }
+
+        .modal-content {
+          max-width: 50vw;
+        }
+
+        .modal-content h2 {
+          margin-bottom: 20px;
+        }
+
+        .modal-content p {
+          margin-bottom: 20px;
+          color: #666;
+        }
+
+        #editDocumentForm {
+          margin-bottom: 20px;
+        }
+
+        #editStatusMessage {
+          margin-top: 10px;
+        }
+      `;
+      document.head.appendChild(modalStyle);
+
+      // Add CSS for view modal
+      const viewModalStyle = document.createElement('style');
+      viewModalStyle.textContent = `
+        .document-details {
+          background-color: #f8f9fa;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
+        }
+
+        .detail-group {
+          margin-bottom: 15px;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 10px;
+        }
+
+        .detail-group:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+        }
+
+        .detail-group label {
+          font-weight: 600;
+          color: #495057;
+          display: block;
+          margin-bottom: 5px;
+          font-size: 14px;
+        }
+
+        .detail-group p {
+          margin: 0;
+          color: #212529;
+          font-size: 15px;
+          line-height: 1.5;
+        }
+
+        .detail-group a {
+          color: #007bff;
+          text-decoration: none;
+        }
+
+        .detail-group a:hover {
+          text-decoration: underline;
+        }
+
+        #viewStatus {
+          display: inline-block;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-weight: 500;
+          font-size: 14px;
+        }
+
+        .status-Pending {
+          background-color: #ffc107;
+          color: #000;
+        }
+
+        .status-Assigned {
+          background-color: #17a2b8;
+          color: #fff;
+        }
+
+        .status-Sent {
+          background-color: #28a745;
+          color: #fff;
+        }
+
+        .status-Archived {
+          background-color: #6c757d;
+          color: #fff;
+        }
+      `;
+      document.head.appendChild(viewModalStyle);
+
+      // Function to view document
+      window.viewDocument = async function(id) {
+        try {
+          showLoading();
+          const docRef = doc(db, 'docu', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            
+            // Populate view fields
+            $('#viewControlNo').text(data.controlNo || 'N/A');
+            $('#viewDate').text(formatDate(data.date) || 'N/A');
+            $('#viewTime').text(formatTime(data.time) || 'N/A');
+            $('#viewSourceAddress').text(data.sourceAddress || 'N/A');
+            $('#viewDocType').text(data.document_type || 'N/A');
+            $('#viewContent').text(data.content || 'N/A');
+            $('#viewReceivedBy').text(data.receivedBy || 'N/A');
+            $('#viewUploadedBy').text(data.uploadedBy || 'N/A');
+            
+            // Handle outgoing details visibility and population
+            const outgoingDetailsSection = $('#outgoingDetailsSection');
+            if (data.status === 'Outgoing') {
+              $('#viewOutgoingReceivedBy').text(data.outgoingReceivedBy || 'N/A');
+              $('#viewOutgoingDate').text(formatDate(data.outgoingDate) || 'N/A');
+              $('#viewOutgoingTime').text(formatTime(data.outgoingTime) || 'N/A');
+              $('#viewOutgoingRemarks').text(data.outgoingRemarks || 'No remarks provided');
+              outgoingDetailsSection.show();
+            } else {
+              outgoingDetailsSection.hide();
+            }
+
+            // Set status with appropriate styling
+            const status = data.status || 'Pending';
+            $('#viewStatus')
+              .text(status)
+              .removeClass()
+              .addClass(`status-label status-${status.replace(/\s+/g, '-')}`);
+            
+            // Handle assignment details visibility and population
+            const assignmentDetailsSection = $('#assignmentDetailsSection');
+            if (data.assignedUsername && data.assignmentTimestamp) {
+              $('#viewAssignedTo').text(data.assignedUsername);
+              $('#viewAssignedDate').text(formatDate(data.assignmentTimestamp.date));
+              $('#viewAssignedTime').text(data.assignmentTimestamp.time);
+              assignmentDetailsSection.show();
+            } else {
+              assignmentDetailsSection.hide();
+            }
+
+            // Handle release details visibility and population
+            const releaseDetailsSection = $('#releaseDetailsSection');
+            if (data.releasedBy && data.releaseTimestamp) {
+              $('#viewReleasedBy').text(data.releasedBy);
+              $('#viewReleasedDate').text(formatDate(data.releaseTimestamp.date));
+              $('#viewReleasedTime').text(data.releaseTimestamp.time);
+              $('#viewReleaseRemarks').text(data.releaseRemarks || 'No remarks provided');
+              releaseDetailsSection.show();
+            } else {
+              releaseDetailsSection.hide();
+            }
+            
+            // Handle Sent to All details
+            const sentToAllSection = $('#sentToAllDetailsSection');
+            if (data.forAll && data.sentToAllAt) {
+              const sentDate = new Date(data.sentToAllAt);
+              $('#viewSentToAllDate').text(
+                `Sent on ${sentDate.toLocaleDateString()} at ${sentDate.toLocaleTimeString()}`
+              );
+              sentToAllSection.show();
+            } else {
+              sentToAllSection.hide();
+            }
+            
+            // Set document link
+            const link = $('#viewDocLink');
+            const outgoingLink = $('#outgoingDocLink');
+            if (data.docLink) {
+              link.attr('href', data.docLink);
+              link.show();
+              outgoingLink.attr('href', data.outgoingLink);
+              outgoingLink.show();
+            } else {
+              link.hide();
+              outgoingLink.hide();
+            }
+            
+            // Show modal
+            $('#viewDocumentModal').show();
+          }
+        } catch (error) {
+          console.error('Error loading document:', error);
+          showStatus('Error loading document details. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      };
+
+      // Add view button style
+      const viewButtonStyle = document.createElement('style');
+      viewButtonStyle.textContent = `
+        .action-button.view {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .action-button.view:hover {
+          background-color: #45a049;
+        }
+
+        .action-button.assign {
+          background-color: #FF9800;
+          color: white;
+        }
+
+        .action-button.assign:hover {
+          background-color: #F57C00;
+        }
+
+        .action-button.for-release {
+          background-color: #9C27B0;
+          color: white;
+        }
+
+        .action-button.for-release:hover {
+          background-color: #7B1FA2;
+        }
+
+        .action-button.release {
+          background-color: #9C27B0;
+          color: white;
+        }
+
+        .action-button.release:hover {
+          background-color: #7B1FA2;
+        }
+
+        .required {
+          color: red;
+          margin-left: 3px;
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 5px;
+        }
+
+        .action-button {
+          padding: 6px 12px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 13px;
+          transition: background-color 0.2s;
+        }
+      `;
+      document.head.appendChild(viewButtonStyle);
+
+      // Function to show/hide modals
+      function showModal(modalId) {
+        // Clear form when showing modal
+        if (modalId === 'sendFileModal') {
+          $('#sendFileForm')[0].reset();
+          $('#controlNoPrefix').val(getCurrentDatePrefix());
+        }
+        $(`#${modalId}`).fadeIn(300);
+      }
+
+      function hideModal(modalId) {
+        // Clear form when hiding modal
+        if (modalId === 'sendFileModal') {
+          $('#sendFileForm')[0].reset();
+          $('#controlNoPrefix').val(getCurrentDatePrefix());
+        } else if (modalId === 'editDocumentModal') {
+          $('#editDocumentForm')[0].reset();
+        }
+        $(`#${modalId}`).fadeOut(300);
+      }
+
+      // Upload File button click handler
+      $('#sendFileBtn').on('click', function() {
+        $('#controlNoPrefix').val(getCurrentDatePrefix());
+        $('#controlNo').val('');
+        showModal('sendFileModal');
+      });
+
+      // Close modal when clicking close button or outside
+      $('.close-btn, .modal').on('click', function(e) {
+        if (e.target === this) {
+          $(this).closest('.modal').fadeOut(300);
+        }
+      });
+
+      // Prevent modal content click from closing modal
+      $('.modal-content').on('click', function(e) {
+        e.stopPropagation();
+      });
+
+      // Function to get current date prefix
+      function getCurrentDatePrefix() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-INC`;
+      }
+
+      // Function to load users for assignment
+      async function loadUsers() {
+        try {
+          const usersRef = collection(db, 'accounts');
+          const snapshot = await getDocs(usersRef);
+          const users = [];
+          
+          snapshot.forEach((doc) => {
+            const userData = doc.data();
+            // Only add non-admin users to the assignment list
+            if (userData.role?.toLowerCase() !== 'admin') {
+              users.push({
+                id: doc.id,
+                username: userData.username || '',
+                email: userData.email || ''
+              });
+            }
+          });
+          
+          const select = $('#assignToUser');
+          
+          // Destroy existing Select2 instance if it exists
+          if (select.hasClass('select2-hidden-accessible')) {
+            select.select2('destroy');
+          }
+          
+          // Clear and populate the select
+          select.empty().append('<option value="">Select a user...</option>');
+          
+          users.forEach((user) => {
+            select.append(`<option value="${user.id}">${user.username}${user.email ? ` (${user.email})` : ''}</option>`);
+          });
+          
+          // Initialize Select2
+          select.select2({
+            dropdownParent: $('#assignModal'),
+            width: '100%',
+            placeholder: 'Select a user...',
+            allowClear: true
+          });
+          
+        } catch (error) {
+          console.error('Error loading users:', error);
+          showStatus('Error loading users. Please try again.', true);
+        }
+      }
+
+      // Function to show assign modal
+      window.assignDocument = async function(id) {
+        $('#assignDocId').val(id);
+        await loadUsers();
+        showModal('assignModal');
+      };
+
+      // Handle assign form submission
+      $('#assignDocumentForm').on('submit', async function(e) {
+        e.preventDefault();
+        showLoading();
+
+        try {
+          const docId = $('#assignDocId').val();
+          const assignedTo = $('#assignToUser').val();
+          const assignedUsername = $('#assignToUser option:selected').text().split(' (')[0];
+          const docRef = doc(db, 'docu', docId);
+
+          // Create assignment timestamp
+          const now = new Date();
+          const assignmentTimestamp = {
+            date: now.toISOString().split('T')[0],
+            time: now.toLocaleTimeString('en-US', { 
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            }),
+            fullTimestamp: now.toISOString()
+          };
+
+          await updateDoc(docRef, {
+            assignedTo: assignedTo,
+            assignedUsername: assignedUsername,
+            status: `Assigned to ${assignedUsername}`,
+            assignmentTimestamp: assignmentTimestamp,
+            assignedAt: now.toISOString()
+          });
+          
+          $('#assignModal').hide();
+          showStatus('Document assigned successfully!');
+          await loadDocuments();
+        } catch (error) {
+          console.error('Error assigning document:', error);
+          showStatus('Error assigning document. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      });
+
+      // Add CSS for assign button
+      const assignButtonStyle = document.createElement('style');
+      assignButtonStyle.textContent = `
+        .action-button.assign {
+          background-color: #FF9800;  /* Orange color */
+          color: white;
+        }
+        
+        .select2-container {
+          width: 100% !important;
+        }
+        
+        .select2-container--default .select2-selection--single {
+          height: 38px;
+          padding: 5px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+          height: 36px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+          line-height: 28px;
+        }
+        
+        .select2-dropdown {
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+        
+        .select2-search__field {
+          padding: 6px !important;
+          border: 1px solid #ddd !important;
+        }
+        
+        .select2-results__option {
+          padding: 8px;
+        }
+        
+        .select2-results__option--highlighted[aria-selected] {
+          background-color: #17a2b8 !important;
+        }
+      `;
+      document.head.appendChild(assignButtonStyle);
+
+      // Add filter functionality
+      const filterButtons = document.querySelectorAll('.filter-btn');
+      const clearFilterBtn = document.getElementById('clearFilter');
+      const currentFilterText = document.getElementById('currentFilter');
+      let currentFilter = null;
+
+      // Function to update filter buttons state
+      function updateFilterButtons(activeButton = null) {
+        filterButtons.forEach(btn => {
+          btn.classList.remove('active');
+        });
+        if (activeButton) {
+          activeButton.classList.add('active');
+        }
+      }
+
+      // Function to update current filter text
+      function updateCurrentFilterText(filterStatus) {
+        currentFilterText.textContent = filterStatus ? 
+          `Showing ${filterStatus} documents` : 
+          'No active filter';
+      }
+
+      // Add click handlers to filter buttons
+      filterButtons.forEach(button => {
+        if (button.id !== 'clearFilter') {
+          button.addEventListener('click', function() {
+            const status = this.dataset.status;
+            
+            if (currentFilter === status) {
+              // If clicking the same filter, clear it
+              currentFilter = null;
+              updateFilterButtons();
+              updateCurrentFilterText(null);
+              applyFilter(null);
+            } else {
+              // Apply new filter
+              currentFilter = status;
+              updateFilterButtons(this);
+              updateCurrentFilterText(status);
+              applyFilter(status);
+            }
+          });
+        }
+      });
+
+      // Add click handler to clear filter button
+      clearFilterBtn.addEventListener('click', function() {
+        currentFilter = null;
+        updateFilterButtons();
+        updateCurrentFilterText(null);
+        applyFilter(null);
+      });
+
+      // Initial load of documents
+      loadDocuments();
+
+      // Function to show release modal
+      window.showReleaseModal = function(id) {
+        $('#releaseDocId').val(id);
+        $('#releasedBy').val('');
+        $('#releaseModal').show();
+      };
+
+      // Handle release form submission
+      $('#releaseForm').on('submit', async function(e) {
+        e.preventDefault();
+        showLoading();
+
+        try {
+          const docId = $('#releaseDocId').val();
+          const releasedBy = $('#releasedBy').val().trim();
+          const releaseRemarks = $('#releaseRemarks').val().trim();
+
+          if (!releasedBy) {
+            showStatus('Please enter who is releasing the document.', true);
+            return;
+          }
+
+          const docRef = doc(db, 'docu', docId);
+          const now = new Date();
+          
+          await updateDoc(docRef, {
+            status: `Released by ${releasedBy}`,
+            releasedBy: releasedBy,
+            releaseRemarks: releaseRemarks,
+            releasedAt: now.toISOString(),
+            releaseTimestamp: {
+              date: now.toISOString().split('T')[0],
+              time: now.toLocaleTimeString('en-US', { 
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              })
+            }
+          });
+
+          $('#releaseModal').hide();
+          showStatus('Document released successfully!');
+          await loadDocuments();
+        } catch (error) {
+          console.error('Error releasing document:', error);
+          showStatus('Error releasing document. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      });
+
+      // Add checkbox event listener for Send to All confirmation
+      document.getElementById('confirmSendToAll').addEventListener('change', function() {
+        document.getElementById('confirmSendToAllBtn').disabled = !this.checked;
+      });
+
+      // Function to show send to all modal
+      window.showSendToAllModal = async function(id) {
+        try {
+          showLoading();
+          const docRef = doc(db, 'docu', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            
+            // Check if document is still eligible for sending to all
+            if (data.status !== 'Pending' || data.forAll) {
+              showStatus('This document cannot be sent to all employees.', true);
+              return;
+            }
+            
+            $('#sendToAllDocId').val(id);
+            $('#confirmSendToAll').prop('checked', false);
+            $('#confirmSendToAllBtn').prop('disabled', true);
+            $('#sendToAllModal').show();
+          }
+        } catch (error) {
+          console.error('Error checking document status:', error);
+          showStatus('Error checking document status. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      };
+
+      // Function to confirm send to all
+      window.confirmSendToAll = async function() {
+        const id = $('#sendToAllDocId').val();
+        showLoading();
+        
+        try {
+          const docRef = doc(db, 'docu', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            
+            // Double check if document is still eligible for sending to all
+            if (data.status !== 'Pending' || data.forAll) {
+              showStatus('This document cannot be sent to all employees.', true);
+              return;
+            }
+            
+            await updateDoc(docRef, {
+              forAll: true,
+              sentToAllAt: new Date().toISOString(),
+              status: 'Shared to All'  // Update the status
+            });
+            
+            $('#sendToAllModal').hide();
+            showStatus('Document has been sent to all employees!');
+          }
+        } catch (error) {
+          console.error('Error sending document to all:', error);
+          showStatus('Error sending document to all. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      };
+
+      // Function to show outgoing modal
+      window.showOutgoingModal = function(id) {
+        $('#outgoingDocId').val(id);
+        $('#outgoingModal').show();
+      };
+
+      // Handle outgoing form submission
+      $('#outgoingForm').on('submit', async function(e) {
+        e.preventDefault();
+        showLoading();
+
+        try {
+          const docId = $('#outgoingDocId').val();
+          const receivedBy = $('#outgoingReceivedBy').val().trim();
+          const outgoingDate = $('#outgoingDate').val();
+          const outgoingTime = $('#outgoingTime').val(); // This will be in 24-hour format
+          const remarks = $('#outgoingRemarks').val().trim();
+          const newLink = $('#outgoingLink').val().trim();
+
+          const docRef = doc(db, 'docu', docId);
+          const docSnap = await getDoc(docRef);
+          
+          if (!docSnap.exists()) {
+            throw new Error('Document not found');
+          }
+
+          const currentData = docSnap.data();
+          
+          // Update control number from INC to OUT
+          let newControlNo = currentData.controlNo;
+          if (newControlNo && newControlNo.includes('-INC-')) {
+            newControlNo = newControlNo.replace('-INC-', '-OUT-');
+          }
+
+          const now = new Date();
+          
+          await updateDoc(docRef, {
+            controlNo: newControlNo,
+            status: 'Outgoing',
+            outgoingReceivedBy: receivedBy,
+            outgoingDate: outgoingDate,
+            outgoingTime: outgoingTime,
+            outgoingRemarks: remarks,
+            outgoingLink: newLink,
+            outgoingTimestamp: now.toISOString(),
+            lastModified: now.toISOString()
+          });
+
+          $('#outgoingModal').hide();
+          showStatus('Document marked as outgoing successfully!');
+          await loadDocuments();
+        } catch (error) {
+          console.error('Error marking document as outgoing:', error);
+          showStatus('Error marking document as outgoing. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      });
+
+      // Add CSS for outgoing button
+      const outgoingButtonStyle = document.createElement('style');
+      outgoingButtonStyle.textContent = `
+        .action-button.outgoing {
+          background-color: #3F51B5;
+          color: white;
+        }
+
+        .action-button.outgoing:hover {
+          background-color: #303F9F;
+        }
+
+        .action-button.for-outgoing {
+          background-color: #3F51B5;
+          color: white;
+        }
+
+        .action-button.for-outgoing:hover {
+          background-color: #303F9F;
+        }
+      `;
+      document.head.appendChild(outgoingButtonStyle);
+
+      // Add CSS for done button
+      const doneButtonStyle = document.createElement('style');
+      doneButtonStyle.textContent = `
+        .action-button.done {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .action-button.done:hover {
+          background-color: #45a049;
+        }
+
+        .action-button.mark-done {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .action-button.mark-done:hover {
+          background-color: #45a049;
+        }
+      `;
+      document.head.appendChild(doneButtonStyle);
+
+      // Function to show mark done modal
+      window.showMarkDoneModal = function(id) {
+        $('#markDoneDocId').val(id);
+        $('#markDoneModal').show();
+      };
+
+      // Function to confirm marking as done
+      window.confirmMarkDone = async function() {
+        const id = $('#markDoneDocId').val();
+        showLoading();
+        
+        try {
+          const docRef = doc(db, 'docu', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const now = new Date();
+            await updateDoc(docRef, {
+              status: 'Completed',
+              markedDoneAt: now.toISOString(),
+              lastModified: now.toISOString()
+            });
+          }
+          
+          $('#markDoneModal').hide();
+          showStatus('Document marked as done successfully!');
+          await loadDocuments();
+        } catch (error) {
+          console.error('Error marking document as done:', error);
+          showStatus('Error marking document as done. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
+      };
+    });
+
+    // Function to check user role and show/hide admin elements
+    function updateAdminFeatures(userSession) {
+      const adminElements = document.querySelectorAll('.admin-only');
+      const isAdmin = userSession.role.toLowerCase() === 'admin';
+      
+      adminElements.forEach(element => {
+        element.style.display = isAdmin ? 'block' : 'none';
+      });
+    }
+
+    // Call this when checking session
+    document.addEventListener('DOMContentLoaded', function() {
+      const userSession = JSON.parse(sessionStorage.getItem('userSession'));
+      if (userSession) {
+        updateAdminFeatures(userSession);
+      }
+    });
+
+    // Remove timepicker initialization and use standard time input
+    window.showOutgoingModal = function(id) {
+      $('#outgoingDocId').val(id);
+      $('#outgoingModal').show();
+    };
+
+    // Handle outgoing form submission with proper time format
+    $('#outgoingForm').on('submit', async function(e) {
+      e.preventDefault();
+      showLoading();
+
+      try {
+        const docId = $('#outgoingDocId').val();
+        const receivedBy = $('#outgoingReceivedBy').val().trim();
+        const outgoingDate = $('#outgoingDate').val();
+        const outgoingTime = $('#outgoingTime').val(); // This will be in 24-hour format
+        const remarks = $('#outgoingRemarks').val().trim();
+        const newLink = $('#outgoingLink').val().trim();
+
+        const docRef = doc(db, 'docu', docId);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+          throw new Error('Document not found');
+        }
+
+        const currentData = docSnap.data();
+        
+        // Update control number from INC to OUT
+        let newControlNo = currentData.controlNo;
+        if (newControlNo && newControlNo.includes('-INC-')) {
+          newControlNo = newControlNo.replace('-INC-', '-OUT-');
+        }
+
+        const now = new Date();
+        
+        await updateDoc(docRef, {
+          controlNo: newControlNo,
+          status: 'Outgoing',
+          outgoingReceivedBy: receivedBy,
+          outgoingDate: outgoingDate,
+          outgoingTime: outgoingTime,
+          outgoingRemarks: remarks,
+          docLink: newLink,
+          outgoingTimestamp: now.toISOString(),
+          lastModified: now.toISOString()
+        });
+
+        $('#outgoingModal').hide();
+        showStatus('Document marked as outgoing successfully!');
+        await loadDocuments();
+      } catch (error) {
+        console.error('Error marking document as outgoing:', error);
+        showStatus('Error marking document as outgoing. Please try again.', true);
+      } finally {
+        hideLoading();
+      }
+    });
+  </script>
+</body>
+
+</html>

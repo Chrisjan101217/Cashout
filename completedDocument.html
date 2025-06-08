@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Completed Documents - HR RecordLink</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* Navbar Styles */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(to right, orange, green);
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-container img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .logo-container span {
+            margin-left: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .dashboard-profile {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            text-align: right;
+            line-height: 1.2;
+        }
+
+        .profile-name:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-name small {
+            opacity: 0.9;
+            display: block;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            list-style: none;
+            padding: 0;
+            margin: 5px 0 0 0;
+            min-width: 150px;
+            z-index: 1000;
+        }
+
+        .profile-dropdown li {
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-dropdown li a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .profile-dropdown li a:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Back button style */
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Rest of your existing styles */
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 80vw;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        /* Add new styles for two-column layout */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .form-grid .form-group {
+            margin-bottom: 5px;
+            padding: 5px;
+        }
+
+        .form-grid .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .status-inactive {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-button:hover {
+            text-decoration: underline;
+        }
+
+        #statusMessage {
+            display: none;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        .status-deleted {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .status-completed {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .password-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 0.5rem;
+            padding-right: 40px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password:hover {
+            color: #333;
+        }
+
+        .toggle-password:focus {
+            outline: none;
+        }
+
+        /* Add CSS for modal buttons and view modal */
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal-content {
+            max-width: 80vw;
+            margin: 2% auto;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .document-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .details-section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .details-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-group {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .detail-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .detail-group label {
+            font-weight: 600;
+            color: #495057;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .detail-group p {
+            margin: 0;
+            color: #212529;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .detail-group a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .detail-group a:hover {
+            text-decoration: underline;
+        }
+
+        #viewStatus {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .status-Pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .status-Assigned {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+
+        .status-Sent {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .status-Archived {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        .status-Completed {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .action-button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.2s;
+        }
+
+        .action-button.view {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .action-button.view:hover {
+            background-color: #45a049;
+        }
+
+        /* Export buttons styles */
+        .export-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .export-buttons button {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .export-buttons .export-excel {
+            background-color: #217346;
+            color: white;
+            border: none;
+        }
+
+        .export-buttons .export-excel:hover {
+            background-color: #1a5c38;
+        }
+
+        .export-buttons .export-print {
+            background-color: #1a5c38;
+            color: white;
+            border: none;
+        }
+
+        .export-buttons .export-print:hover {
+            background-color: #004494;
+        }
+
+        /* DataTables Buttons styling */
+        .dt-buttons {
+            margin-bottom: 15px;
+        }
+
+        .dt-button {
+            margin-right: 10px !important;
+            padding: 8px 16px !important;
+            border: none !important;
+            border-radius: 4px !important;
+            font-size: 14px !important;
+            cursor: pointer !important;
+            transition: background-color 0.3s !important;
+        }
+
+        .dt-button.btn-success {
+            background-color: #217346 !important;
+            color: white !important;
+        }
+
+        .dt-button.btn-success:hover {
+            background-color: #1a5c38 !important;
+        }
+
+        .dt-button.btn-primary {
+            background-color: #0056b3 !important;
+            color: white !important;
+        }
+
+        .dt-button.btn-primary:hover {
+            background-color: #004494 !important;
+        }
+
+        .dt-button i {
+            margin-right: 5px;
+        }
+
+        .action-button.delete {
+            background-color: #dc3545;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .action-button.delete:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <button class="back-button" onclick="window.location.href='/web/dashboard.html'">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </button>
+        <div class="logo-container">
+            <img src="/img/HRIco.jpg" alt="HR Logo">
+            <span>Manage Completed Documents</span>
+        </div>
+        <div class="dashboard-profile">
+            <img src="/img/UserIco.png" alt="Profile" class="profile-icon" />
+            <div class="profile-name" onclick="toggleProfileMenu()" id="profileName">Loading...</div>
+            <ul class="profile-dropdown" id="profileMenu">
+                <li class="admin-only" style="display: none;"><a href="/web/manageaccounts.html">Manage Accounts</a></li>
+                <li><a href="#" onclick="logout()">Log Out</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="statusMessage"></div>
+        
+        <div class="card">
+            <div class="export-buttons" style="margin-bottom: 20px;">
+                <button class="btn btn-primary">Export to Excel</button>
+                <button class="btn btn-primary">Print</button>
+            </div>
+            <table id="usersTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Control #</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Received From</th>
+                        <th>Document Type</th>
+                        <th>Content</th>
+                        <th>Received By</th>
+                        <th>Uploaded By</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="hideModal('userModal')">&times;</span>
+            <h2 id="modalTitle">Add New User</h2>
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <div class="form-grid">
+                    <div class="form-group" style="margin-right: 15px;">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-input-container">
+                            <input type="password" id="password" class="password-input">
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small>(Leave blank to keep existing password when editing)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="password-input-container">
+                            <input type="password" id="confirmPassword" class="password-input">
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirmPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select id="role" required>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Archive Confirmation Modal -->
+    <div id="archiveModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="$('#archiveModal').hide()">&times;</span>
+            <h2>Archive Document</h2>
+            <p>Are you sure you want to archive this document?</p>
+            <input type="hidden" id="archiveDocId">
+            <div class="modal-buttons">
+                <button onclick="confirmArchive()" class="action-button archive">Yes, Archive</button>
+                <button onclick="$('#archiveModal').hide()" class="action-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="$('#deleteModal').hide()">&times;</span>
+            <h2>Delete Document</h2>
+            <p>Are you sure you want to delete this document? This action cannot be undone.</p>
+            <input type="hidden" id="deleteDocId">
+            <div class="modal-buttons">
+                <button onclick="confirmDelete()" class="action-button delete">Yes, Delete</button>
+                <button onclick="$('#deleteModal').hide()" class="action-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Document Modal -->
+    <div id="viewDocumentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="$('#viewDocumentModal').hide()">&times;</span>
+            <h2>Document Details</h2>
+            <div style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
+                <!-- Basic Details Section -->
+                <div class="details-section" style="width: 100%;">
+                    <h3>Basic Details</h3>
+                    <div class="details-grid">
+                        <div class="detail-group">
+                            <label>Document Link:</label>
+                            <a id="viewDocLink" href="#" target="_blank">Open Document</a>
+                        </div>
+                        <div class="detail-group">
+                            <label>Control #:</label>
+                            <p id="viewControlNo"></p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Date:</label>
+                            <p id="viewDate"></p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Time:</label>
+                            <p id="viewTime"></p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Source Address:</label>
+                            <p id="viewSourceAddress"></p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Document Type:</label>
+                            <p id="viewDocType"></p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Content:</label>
+                            <p id="viewContent"></p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Received By:</label>
+                            <p id="viewReceivedBy"></p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Uploaded By:</label>
+                            <p id="viewUploadedBy"></p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Status:</label>
+                            <p id="viewStatus"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignment and Release Section -->
+                <div class="details-section" style="width: 100%;">
+                    <h3>Assignment & Release Details</h3>
+                    <!-- Assignment Details Section -->
+                    <div id="assignmentDetailsSection" style="display: none;">
+                        <div class="details-grid">
+                            <div class="detail-group assignment-details">
+                                <label>Assigned To:</label>
+                                <p id="viewAssignedTo"></p>
+                            </div>
+                            <div class="detail-group assignment-details">
+                                <label>Assigned Date:</label>
+                                <p id="viewAssignedDate"></p>
+                            </div>
+                            <div class="detail-group assignment-details">
+                                <label>Assigned Time:</label>
+                                <p id="viewAssignedTime"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Release Details Section -->
+                    <div id="releaseDetailsSection" style="display: none;">
+                        <div class="details-grid">
+                            <div class="detail-group release-details">
+                                <label>Released By:</label>
+                                <p id="viewReleasedBy"></p>
+                            </div>
+                            <div class="detail-group release-details">
+                                <label>Released Date:</label>
+                                <p id="viewReleasedDate"></p>
+                            </div>
+                            <div class="detail-group release-details">
+                                <label>Released Time:</label>
+                                <p id="viewReleasedTime"></p>
+                            </div>
+                            <div class="detail-group release-details release-remarks">
+                                <label>Release Remarks:</label>
+                                <p id="viewReleaseRemarks"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sent to All Details Section -->
+                    <div id="sentToAllDetailsSection" style="display: none;">
+                        <h4>Shared Information</h4>
+                        <div class="details-grid">
+                            <div class="detail-group sent-to-all-details">
+                                <label>Sent to All Employees:</label>
+                                <p id="viewSentToAllDate"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outgoing Section -->
+                <div class="details-section" style="width: 100%;">
+                    <h3>Outgoing Details</h3>
+                    <div id="outgoingDetailsSection" style="display: none;">
+                        <div class="detail-group">
+                            <label>Outgoing Document Link:</label>
+                            <a id="outgoingDocLink" href="#" target="_blank">Open Document</a>
+                        </div>
+                        <div class="details-grid">
+                            <div class="detail-group outgoing-details">
+                                <label>Outgoing Received By:</label>
+                                <p id="viewOutgoingReceivedBy"></p>
+                            </div>
+                            <div class="detail-group outgoing-details">
+                                <label>Outgoing Date:</label>
+                                <p id="viewOutgoingDate"></p>
+                            </div>
+                            <div class="detail-group outgoing-details">
+                                <label>Outgoing Time:</label>
+                                <p id="viewOutgoingTime"></p>
+                            </div>
+                            <div class="detail-group outgoing-details outgoing-remarks">
+                                <label>Outgoing Remarks:</label>
+                                <p id="viewOutgoingRemarks"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="$('#viewDocumentModal').hide()" class="action-button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { app, db, collection, onSnapshot, fsQuery, doc, deleteDoc, getFirestore, updateDoc, getDoc, addDoc, where, auth, signOut, getDocs } from '../src/client/cli.mjs';
+
+        // Function to wait for Firestore initialization
+        function waitForFirestore() {
+            return new Promise((resolve) => {
+                const checkFirestore = () => {
+                    if (db) {
+                        resolve(db);
+                    } else {
+                        setTimeout(checkFirestore, 100);
+                    }
+                };
+                checkFirestore();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Wait for Firestore to be initialized
+                const firestore = await waitForFirestore();
+                
+                // Check for user session and update profile name
+                const userSession = sessionStorage.getItem('userSession');
+                if (!userSession) {
+                    window.location.href = '/web/userlogin.html';
+                    return;
+                }
+                
+                const userData = JSON.parse(userSession);
+                // Update profile name with username and role
+                const profileNameElement = document.getElementById('profileName');
+                profileNameElement.innerHTML = `${userData.username}<br><small style="font-size: 0.8em;">${userData.role.toUpperCase()}</small>`;
+
+                // Check for user session
+                const checkSession = () => {
+                    const userSession = sessionStorage.getItem('userSession');
+                    if (!userSession) {
+                        window.location.href = '/web/userlogin.html';
+                        return;
+                    }
+                    
+                    const userData = JSON.parse(userSession);
+                    if (userData.role.toLowerCase() !== 'admin') {
+                        window.location.href = '/web/dashboard.html';
+                        return;
+                    }
+                };
+
+                // Initialize session check
+                checkSession();
+
+                // Initialize DataTable
+                let usersTable;
+
+                // Load users data
+                async function loadUsers() {
+                    try {
+                        // Create the query using the imported functions
+                        const q = fsQuery(
+                            collection(firestore, 'docu'),
+                            where('status', '==', 'Completed')
+                        );
+                        
+                        // First test if we can access the collection
+                        try {
+                            const testSnapshot = await getDocs(q);
+                            console.log('Successfully connected to Firestore123');
+                            console.log('Number of documents:', testSnapshot.size);
+                            testSnapshot.forEach(doc => {
+                                console.log('Document data:', doc.data());
+                            });
+                        } catch (error) {
+                            console.error('Error accessing Firestore:', error);
+                            showStatus('Error accessing database. Please check your connection and reload the page.', true);
+                            return;
+                        }
+                        
+                        // Set up real-time listener with error handling
+                        const unsubscribe = onSnapshot(q, (snapshot) => {
+                            try {
+                                const documents = [];
+                                snapshot.forEach((doc) => {
+                                    const docData = doc.data();
+                                    console.log(docData, 'docData123');
+                                    if (docData) {
+                                        documents.push({
+                                            id: doc.id,
+                                            controlNo: docData.controlNo?.toString() || '',
+                                            date: docData.date?.toString() || '',
+                                            time: docData.time?.toString() || '',
+                                            sourceAddress: docData.sourceAddress?.toString() || '',
+                                            document_type: docData.document_type?.toString() || '',
+                                            content: docData.content?.toString() || '',
+                                            receivedBy: docData.receivedBy?.toString() || '',
+                                            uploadedBy: docData.uploadedBy?.toString() || '',
+                                            status: docData.status || '',
+                                            archived: Boolean(docData.archived),
+                                            deleted: Boolean(docData.deleted),
+                                            forAll: Boolean(docData.forAll),
+                                            sentToAllAt: docData.sentToAllAt || null,
+                                            previousStatus: docData.previousStatus || null
+                                        });
+                                    }
+                                });
+                                
+                                console.log('Documents to display:', documents);
+                                
+                                // Initialize or update table
+                                if ($.fn.DataTable.isDataTable('#usersTable')) {
+                                    $('#usersTable').DataTable().clear().rows.add(documents).draw();
+                                } else {
+                                    initializeDataTable(documents);
+                                }
+                            } catch (error) {
+                                console.error('Error processing documents:', error);
+                                showStatus('Error processing documents. Please refresh the page.', true);
+                            }
+                        }, (error) => {
+                            console.error('Firestore listener error:', error);
+                            showStatus('Error listening to database changes: ' + error.message, true);
+                        });
+
+                        // Store unsubscribe function for cleanup
+                        window.addEventListener('beforeunload', () => {
+                            if (unsubscribe) {
+                                unsubscribe();
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error in loadUsers:', error);
+                        showStatus('Error loading documents: ' + error.message, true);
+                    }
+                }
+
+                // Initialize DataTable
+                function initializeDataTable(documents) {
+                    try {
+                        if (!Array.isArray(documents)) {
+                            documents = [];
+                        }
+
+                        // Destroy existing table if it exists
+                        if ($.fn.DataTable.isDataTable('#usersTable')) {
+                            $('#usersTable').DataTable().destroy();
+                        }
+                        
+                        // Clear the table body
+                        $('#usersTable tbody').empty();
+                        
+                        usersTable = $('#usersTable').DataTable({
+                            data: documents,
+                            dom: 'Bfrtip',
+                            buttons: [
+                                {
+                                    extend: 'excel',
+                                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                                    className: 'btn btn-success',
+                                    exportOptions: {
+                                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                                        format: {
+                                            body: function(data, row, column, node) {
+                                                // Clean the data for export
+                                                if (column === 8) { // Status column
+                                                    return $(data).text().trim();
+                                                }
+                                                return data;
+                                            }
+                                        }
+                                    },
+                                    title: 'Completed Documents - HR RecordLink',
+                                    filename: 'Completed_Documents_Export_' + new Date().toISOString().split('T')[0]
+                                },
+                                {
+                                    extend: 'print',
+                                    text: '<i class="fas fa-print"></i> Print',
+                                    className: 'btn btn-primary',
+                                    exportOptions: {
+                                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+                                    },
+                                    title: 'Completed Documents - HR RecordLink',
+                                    customize: function(win) {
+                                        $(win.document.body)
+                                            .css('font-size', '10pt')
+                                            .prepend(
+                                                '<div style="text-align: center; margin-bottom: 20px;">' +
+                                                '<h3>HR RecordLink - Completed Documents</h3>' +
+                                                '<p>Generated on: ' + new Date().toLocaleDateString() + '</p>' +
+                                                '</div>'
+                                            );
+                                        $(win.document.body).find('table')
+                                            .addClass('compact')
+                                            .css('font-size', 'inherit');
+                                    }
+                                }
+                            ],
+                            columns: [
+                                { data: 'controlNo', title: 'Control #' },
+                                { data: 'date', title: 'Date' },
+                                { data: 'time', title: 'Time' },
+                                { data: 'sourceAddress', title: 'Received From' },
+                                { data: 'document_type', title: 'Document Type' },
+                                { data: 'content', title: 'Content' },
+                                { data: 'receivedBy', title: 'Received By' },
+                                { data: 'uploadedBy', title: 'Uploaded By' },
+                                {
+                                    data: 'status',
+                                    title: 'Status',
+                                    render: function(data) {
+                                        const statusClass = data === 'active' ? 'status-active' : 
+                                                          data === 'deleted' ? 'status-deleted' :
+                                                          data === 'Completed' ? 'status-completed' :
+                                                          'status-inactive';
+                                        return `<span class="status-badge ${statusClass}">${(data || '').charAt(0).toUpperCase() + (data || '').slice(1)}</span>`;
+                                    }
+                                },
+                                {
+                                    data: 'id',
+                                    title: 'Action',
+                                    orderable: false,
+                                    searchable: false,
+                                    render: function(data, type, row) {
+                                        if (type === 'display') {
+                                            const isAdmin = JSON.parse(sessionStorage.getItem('userSession')).role.toLowerCase() === 'admin';
+                                            return `
+                                                <div class="action-buttons">
+                                                    <button onclick="viewDocument('${data}')" class="action-button view">View</button>
+                                                    <button onclick="deleteDocument('${data}')" class="action-button delete">Delete</button>
+                                                </div>
+                                            `;
+                                        }
+                                        return data;
+                                    }
+                                }
+                            ],
+                            order: [[0, 'asc']],
+                            language: {
+                                emptyTable: "No documents found"
+                            },
+                            responsive: true,
+                            processing: true
+                        });
+
+                        // Remove the custom export buttons since we're using DataTables buttons
+                        $('.export-buttons').remove();
+                    } catch (error) {
+                        console.error('Error initializing DataTable:', error);
+                        showStatus('Error initializing table. Please refresh the page.', true);
+                    }
+                }
+
+                // Show status message
+                function showStatus(message, isError = false) {
+                    const statusDiv = document.getElementById('statusMessage');
+                    statusDiv.textContent = message;
+                    statusDiv.className = isError ? 'error' : 'success';
+                    statusDiv.style.display = 'block';
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                    }, 3000);
+                }
+
+                // Show/hide modals
+                window.showModal = function(modalId) {
+                    document.getElementById(modalId).style.display = 'block';
+                }
+
+                window.hideModal = function(modalId) {
+                    document.getElementById(modalId).style.display = 'none';
+                    if (modalId === 'userModal') {
+                        document.getElementById('userForm').reset();
+                        document.getElementById('userId').value = '';
+                    }
+                }
+
+                // Add new user
+                window.showAddUserModal = function() {
+                    document.getElementById('modalTitle').textContent = 'Add New User';
+                    document.getElementById('userForm').reset();
+                    document.getElementById('userId').value = '';
+                    document.getElementById('password').required = true;
+                    document.getElementById('confirmPassword').required = true;
+                    document.getElementById('password').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                    showModal('userModal');
+                }
+
+                // Edit user
+                window.editUser = async function(userId) {
+                    try {
+                        const userRef = doc(firestore, 'accounts', userId);
+                        const userDoc = await getDoc(userRef);
+                        
+                        if (!userDoc.exists()) {
+                            showStatus('User not found', true);
+                            return;
+                        }
+
+                        const userData = userDoc.data();
+                        document.getElementById('modalTitle').textContent = 'Edit User';
+                        document.getElementById('userId').value = userId;
+                        document.getElementById('username').value = userData.username || '';
+                        document.getElementById('email').value = userData.email || '';
+                        document.getElementById('role').value = userData.role || 'user';
+                        document.getElementById('status').value = userData.status || 'active';
+                        document.getElementById('password').required = false;
+                        document.getElementById('password').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                        showModal('userModal');
+                    } catch (error) {
+                        console.error('Error loading user:', error);
+                        showStatus('Error loading user details: ' + error.message, true);
+                    }
+                }
+
+                // Archive user
+                window.archiveDocument = function(id) {
+                    $('#archiveDocId').val(id);
+                    $('#archiveModal').show();
+                };
+
+                window.confirmArchive = async function() {
+                    const id = $('#archiveDocId').val();
+                    showLoading();
+                    
+                    try {
+                        const docRef = doc(firestore, 'accounts', id);
+                        const docSnap = await getDoc(docRef);
+                        
+                        if (docSnap.exists()) {
+                            await updateDoc(docRef, {
+                                status: 'inactive',
+                                archivedAt: new Date().toISOString()
+                            });
+                        }
+                        
+                        $('#archiveModal').hide();
+                        showStatus('User has been deactivated successfully!');
+                    } catch (error) {
+                        console.error('Error deactivating user:', error);
+                        showStatus('Error deactivating user. Please try again.', true);
+                    } finally {
+                        hideLoading();
+                    }
+                };
+
+                // Handle form submission
+                document.getElementById('userForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const userId = document.getElementById('userId').value;
+                    const username = document.getElementById('username').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    const role = document.getElementById('role').value;
+                    const status = document.getElementById('status').value;
+
+                    // Validate inputs
+                    if (!username || !email) {
+                        showStatus('Username and email are required', true);
+                        return;
+                    }
+
+                    if (!userId) {  // Only check password for new users
+                        if (!password || !confirmPassword) {
+                            showStatus('Password and confirm password are required', true);
+                            return;
+                        }
+
+                        if (password !== confirmPassword) {
+                            showStatus('Passwords do not match', true);
+                            return;
+                        }
+                    }
+
+                    // Check if username already exists (for new users)
+                    if (!userId) {
+                        try {
+                            const accountsRef = collection(firestore, 'accounts');
+                            const snapshot = await getDocs(accountsRef);
+                            const exists = snapshot.docs.some(doc => 
+                                doc.data().username.toLowerCase() === username.toLowerCase() ||
+                                doc.data().email.toLowerCase() === email.toLowerCase()
+                            );
+                            
+                            if (exists) {
+                                showStatus('Username or email already exists', true);
+                                return;
+                            }
+                        } catch (error) {
+                            console.error('Error checking existing users:', error);
+                            showStatus('Error checking existing users: ' + error.message, true);
+                            return;
+                        }
+                    }
+
+                    // Function to hash password
+                    async function hashPassword(password) {
+                        const encoder = new TextEncoder();
+                        const data = encoder.encode(password);
+                        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                        const hashArray = Array.from(new Uint8Array(hashBuffer));
+                        return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+                    }
+
+                    const userData = {
+                        username,
+                        email,
+                        role,
+                        status,
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    try {
+                        if (userId) {
+                            // Update existing user
+                            if (password) {  // Only update password if provided
+                                userData.password = await hashPassword(password);
+                            }
+                            const userRef = doc(firestore, 'accounts', userId);
+                            await updateDoc(userRef, userData);
+                            showStatus('User updated successfully');
+                        } else {
+                            // Create user in Firebase Authentication first
+                            try {
+                                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                                const firebaseUser = userCredential.user;
+                                
+                                // Add new user to Firestore using the Firebase Auth UID
+                                userData.createdAt = new Date().toISOString();
+                                userData.password = await hashPassword(password);  // Store hashed password
+                                const userRef = doc(firestore, 'accounts', firebaseUser.uid);
+                                await updateDoc(userRef, userData);
+                                showStatus('User added successfully');
+                            } catch (authError) {
+                                console.error('Error creating user in Firebase Auth:', authError);
+                                showStatus('Error creating user: ' + authError.message, true);
+                                return;
+                            }
+                        }
+                        hideModal('userModal');
+                    } catch (error) {
+                        console.error('Error saving user:', error);
+                        showStatus('Error saving user: ' + error.message, true);
+                    }
+                });
+
+                // Initialize the page
+                loadUsers();
+
+                // Password visibility toggle function
+                window.togglePasswordVisibility = function(inputId) {
+                    const input = document.getElementById(inputId);
+                    const button = input.parentElement.querySelector('.toggle-password');
+                    const icon = button.querySelector('i');
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                };
+
+                // Reset password fields and icons when modal is closed
+                const originalHideModal = window.hideModal;
+                window.hideModal = function(modalId) {
+                    originalHideModal(modalId);
+                    if (modalId === 'userModal') {
+                        const passwordInputs = document.querySelectorAll('input[type="text"].password-input');
+                        passwordInputs.forEach(input => {
+                            input.type = 'password';
+                            const icon = input.parentElement.querySelector('.toggle-password i');
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        });
+                    }
+                };
+
+                // Add CSS for modal buttons and view modal
+                const modalStyle = document.createElement('style');
+                modalStyle.textContent = `
+                    .modal-buttons {
+                        display: flex;
+                        gap: 10px;
+                        justify-content: flex-end;
+                        margin-top: 20px;
+                    }
+
+                    .modal-content {
+                        max-width: 80vw;
+                        margin: 2% auto;
+                    }
+
+                    .modal-content h2 {
+                        margin-bottom: 20px;
+                    }
+
+                    .modal-content p {
+                        margin-bottom: 20px;
+                        color: #666;
+                    }
+
+                    .document-details {
+                        background-color: #f8f9fa;
+                        border-radius: 8px;
+                        padding: 20px;
+                        margin-bottom: 20px;
+                    }
+
+                    .details-section {
+                        background-color: #fff;
+                        border-radius: 8px;
+                        padding: 20px;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                        margin-bottom: 20px;
+                    }
+
+                    .details-section h3 {
+                        margin-bottom: 15px;
+                        color: #333;
+                        font-size: 18px;
+                    }
+
+                    .details-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                        gap: 15px;
+                    }
+
+                    .detail-group {
+                        margin-bottom: 15px;
+                        border-bottom: 1px solid #eee;
+                        padding-bottom: 10px;
+                    }
+
+                    .detail-group:last-child {
+                        border-bottom: none;
+                        margin-bottom: 0;
+                    }
+
+                    .detail-group label {
+                        font-weight: 600;
+                        color: #495057;
+                        display: block;
+                        margin-bottom: 5px;
+                        font-size: 14px;
+                    }
+
+                    .detail-group p {
+                        margin: 0;
+                        color: #212529;
+                        font-size: 15px;
+                        line-height: 1.5;
+                    }
+
+                    .detail-group a {
+                        color: #007bff;
+                        text-decoration: none;
+                    }
+
+                    .detail-group a:hover {
+                        text-decoration: underline;
+                    }
+
+                    #viewStatus {
+                        display: inline-block;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        font-weight: 500;
+                        font-size: 14px;
+                    }
+
+                    .status-Pending {
+                        background-color: #ffc107;
+                        color: #000;
+                    }
+
+                    .status-Assigned {
+                        background-color: #17a2b8;
+                        color: #fff;
+                    }
+
+                    .status-Sent {
+                        background-color: #28a745;
+                        color: #fff;
+                    }
+
+                    .status-Archived {
+                        background-color: #6c757d;
+                        color: #fff;
+                    }
+
+                    .status-Completed {
+                        background-color: #28a745;
+                        color: #fff;
+                    }
+
+                    .action-button {
+                        padding: 6px 12px;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 13px;
+                        transition: background-color 0.2s;
+                    }
+
+                    .action-button.view {
+                        background-color: #4CAF50;
+                        color: white;
+                    }
+
+                    .action-button.view:hover {
+                        background-color: #45a049;
+                    }
+
+                    .action-button.delete {
+                        background-color: #dc3545;
+                        color: white;
+                        margin-left: 5px;
+                    }
+
+                    .action-button.delete:hover {
+                        background-color: #c82333;
+                    }
+                `;
+                document.head.appendChild(modalStyle);
+
+                // Function to view document
+                window.viewDocument = async function(id) {
+                    try {
+                        showLoading();
+                        const docRef = doc(db, 'docu', id);
+                        const docSnap = await getDoc(docRef);
+                        
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            
+                            // Populate view fields
+                            $('#viewControlNo').text(data.controlNo || 'N/A');
+                            $('#viewDate').text(formatDate(data.date) || 'N/A');
+                            $('#viewTime').text(formatTime(data.time) || 'N/A');
+                            $('#viewSourceAddress').text(data.sourceAddress || 'N/A');
+                            $('#viewDocType').text(data.document_type || 'N/A');
+                            $('#viewContent').text(data.content || 'N/A');
+                            $('#viewReceivedBy').text(data.receivedBy || 'N/A');
+                            $('#viewUploadedBy').text(data.uploadedBy || 'N/A');
+                            $('#viewDocLink').attr('href', data.docLink || '#').text('Open Document');
+                            
+                            // Handle assignment details visibility and population
+                            const assignmentDetailsSection = $('#assignmentDetailsSection');
+                            if (data.assignedTo || data.assignedUsername) {
+                                const assignmentTime = data.assignmentTimestamp ? formatTimestamp(data.assignmentTimestamp) : { date: 'N/A', time: 'N/A' };
+                                $('#viewAssignedTo').text(data.assignedUsername || data.assignedTo || 'N/A');
+                                $('#viewAssignedDate').text(assignmentTime.date);
+                                $('#viewAssignedTime').text(assignmentTime.time);
+                                assignmentDetailsSection.show();
+                            } else {
+                                assignmentDetailsSection.hide();
+                            }
+
+                            // Handle release details visibility and population
+                            const releaseDetailsSection = $('#releaseDetailsSection');
+                            if (data.releasedBy || data.releaseTimestamp) {
+                                const releaseTime = data.releaseTimestamp ? formatTimestamp(data.releaseTimestamp) : { date: 'N/A', time: 'N/A' };
+                                $('#viewReleasedBy').text(data.releasedBy || 'N/A');
+                                $('#viewReleasedDate').text(releaseTime.date);
+                                $('#viewReleasedTime').text(releaseTime.time);
+                                $('#viewReleaseRemarks').text(data.releaseRemarks || 'No remarks provided');
+                                releaseDetailsSection.show();
+                            } else {
+                                releaseDetailsSection.hide();
+                            }
+
+                            // Handle outgoing details visibility and population
+                            const outgoingDetailsSection = $('#outgoingDetailsSection');
+                            if (data.status === 'Outgoing' || data.outgoingReceivedBy) {
+                                $('#viewOutgoingReceivedBy').text(data.outgoingReceivedBy || 'N/A');
+                                $('#viewOutgoingDate').text(formatDate(data.outgoingDate) || 'N/A');
+                                $('#viewOutgoingTime').text(formatTime(data.outgoingTime) || 'N/A');
+                                $('#viewOutgoingRemarks').text(data.outgoingRemarks || 'No remarks provided');
+                                $('#outgoingDocLink').attr('href', data.outgoingLink || '#');
+                                outgoingDetailsSection.show();
+                            } else {
+                                outgoingDetailsSection.hide();
+                            }
+
+                            // Set status with appropriate styling
+                            const status = data.status || 'Pending';
+                            $('#viewStatus')
+                                .text(status)
+                                .removeClass()
+                                .addClass(`status-label status-${status.replace(/\s+/g, '-')}`);
+                            
+                            // Show modal
+                            $('#viewDocumentModal').show();
+                        }
+                    } catch (error) {
+                        console.error('Error loading document:', error);
+                        showStatus('Error loading document details. Please try again.', true);
+                    } finally {
+                        hideLoading();
+                    }
+                };
+
+                // Add modal close handlers
+                $('.close-btn, .modal').on('click', function(e) {
+                    if (e.target === this) {
+                        $(this).closest('.modal').hide();
+                    }
+                });
+
+                // Helper functions for date and time formatting
+                function formatDate(date) {
+                    if (!date) return null;
+                    return new Date(date).toLocaleDateString();
+                }
+
+                function formatTime(timeStr) {
+                    if (!timeStr) return 'N/A';
+                    try {
+                        // Handle timestamp object format
+                        if (typeof timeStr === 'object' && timeStr.hasOwnProperty('time')) {
+                            return timeStr.time;
+                        }
+                        
+                        // Handle string time format
+                        const date = new Date(`1970-01-01T${timeStr}`);
+                        if (isNaN(date.getTime())) {
+                            // If invalid date, return the original time string if it looks like a formatted time
+                            if (typeof timeStr === 'string' && timeStr.match(/^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(?:AM|PM)$/i)) {
+                                return timeStr;
+                            }
+                            return 'N/A';
+                        }
+                        
+                        // Format to 12-hour time with AM/PM in PH format
+                        return date.toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true,
+                            timeZone: 'Asia/Manila'
+                        });
+                    } catch (error) {
+                        console.error('Error formatting time:', error);
+                        return 'N/A';
+                    }
+                }
+
+                // Add helper function to handle timestamp objects
+                function formatTimestamp(timestamp) {
+                    if (!timestamp) return { date: 'N/A', time: 'N/A' };
+                    try {
+                        if (typeof timestamp === 'object') {
+                            return {
+                                date: formatDate(timestamp.date) || 'N/A',
+                                time: formatTime(timestamp.time) || 'N/A'
+                            };
+                        }
+                        const date = new Date(timestamp);
+                        if (isNaN(date.getTime())) return { date: 'N/A', time: 'N/A' };
+                        return {
+                            date: date.toLocaleDateString(),
+                            time: date.toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true,
+                                timeZone: 'Asia/Manila'
+                            })
+                        };
+                    } catch (error) {
+                        console.error('Error formatting timestamp:', error);
+                        return { date: 'N/A', time: 'N/A' };
+                    }
+                }
+
+                function showLoading() {
+                    // Add loading indicator if needed
+                }
+
+                function hideLoading() {
+                    // Remove loading indicator if needed
+                }
+
+                // Function to delete document
+                window.deleteDocument = function(id) {
+                    $('#deleteDocId').val(id);
+                    $('#deleteModal').show();
+                };
+
+                window.confirmDelete = async function() {
+                    const id = $('#deleteDocId').val();
+                    try {
+                        showLoading();
+                        const docRef = doc(db, 'docu', id);
+                        await deleteDoc(docRef);
+                        $('#deleteModal').hide();
+                        showStatus('Document has been deleted successfully!');
+                    } catch (error) {
+                        console.error('Error deleting document:', error);
+                        showStatus('Error deleting document. Please try again.', true);
+                    } finally {
+                        hideLoading();
+                    }
+                };
+            } catch (error) {
+                console.error('Error initializing application:', error);
+                showStatus('Error initializing application. Please refresh the page.', true);
+            }
+        });
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById("profileMenu");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            const profile = document.querySelector('.dashboard-profile');
+            const menu = document.getElementById('profileMenu');
+            if (!profile.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 
